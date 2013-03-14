@@ -1,0 +1,2 @@
+box { height = $high; width = 1; color = $colour; } $name;
+
