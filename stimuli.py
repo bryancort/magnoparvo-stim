@@ -1,66 +1,70 @@
 
 # standard
 import colorsys
+from collections import namedtuple
+import math
+import random
 import time
 
 # local
 import PresPy
 
+STIM_WIDTH = 1024
+STIM_HEIGHT = 768
+BARS_COUNT = 64
+
+Position = namedtuple('Position', ['x', 'y'])
+
 # Create presentation controller
 pc = PresPy.Presentation_control()
 
 # Set headers
-pc.set_header_parameter("scenario_type", "trials")
-pc.set_header_parameter('default_background_color', '0,0,0')
-pc.set_header_parameter('screen_height', 768)
-pc.set_header_parameter('screen_width', 1024)
-pc.set_header_parameter('screen_bit_depth', 32)
-pc.set_header_parameter('write_codes', True)
-pc.set_header_parameter('pulse_width', 8)
-pc.set_header_parameter('active_buttons', 4)
-pc.set_header_parameter('button_codes', '1,2,101,101')
+# pc.set_header_parameter("scenario_type", "trials")
+# pc.set_header_parameter('default_background_color', '0,0,0')
+# pc.set_header_parameter('screen_height', 768)
+# pc.set_header_parameter('screen_width', 1024)
+# pc.set_header_parameter('screen_bit_depth', 32)
+# pc.set_header_parameter('write_codes', True)
+# pc.set_header_parameter('pulse_width', 8)
+# pc.set_header_parameter('active_buttons', 4)
+# pc.set_header_parameter('button_codes', '1,2,101,101')
 
 # Open experiment file
-pc.open_experiment("C:\\my_experiment.exp")
+pc.open_experiment("C:\\gaelen-pypres\my-experiment.exp")
 
 # Run scenario
-scen = pc.run(0)  # (pc.PRESCONTROL1_SHOW_STATUS | pc.PRESCONTROL1_USER_CONTROL | pc.PRESCONTROL1_WRITE_OUTPUT, 0)
-#surface1 = scen.graphic_surface(100, 100)
-
-# # Create display thingie
-# txt1 = scen.text()
-# txt1.set_font_size(48)
-# txt1.set_caption("Hello world!", redraw=True)
-
-# pic1 = scen.picture()
-# pic1.add_part(txt1, 0, 0)
-
-# for i in range(100):
-#     pic1.set_part_y(1, 50 - i)
-#     pic1.present()
+scene = pc.run(0)  # (pc.PRESCONTROL1_SHOW_STATUS | pc.PRESCONTROL1_USER_CONTROL | pc.PRESCONTROL1_WRITE_OUTPUT, 0)
 
 nv = lambda x: x / 239.0
 
 red = PresPy.rgb_color(colorsys.hls_to_rgb(0.0, 0.5, 1.0))
 green = PresPy.rgb_color(colorsys.hls_to_rgb(0.334, 0.5, 1.0))
 blue = PresPy.rgb_color(colorsys.hls_to_rgb(0.667, 0.5, 1.0))
+bar_colors = ((red, green, blue), (green, blue, red), (blue, red, green))
 
 #green = scen.rgb_color(0, 255, 0)  # Maybe PresPy.rgb_color()
-box_red = scen.box(1024, 768, red)
-box_green = scen.box(1024, 768, green)
-box_blue = scen.box(1024, 768, blue)
+box_red = scene.box(1024, 768, red)
+box_green = scene.box(1024, 768, green)
+box_blue = scene.box(1024, 768, blue)
 
-pic = scen.picture()
-pic.add_part(box_red)
-pic.present()
-time.sleep(5)
-pic.add_part(box_green)
-pic.present()
-time.sleep(5)
-pic.add_part(box_blue)
-pic.present()
-time.sleep(5)
+
+def make_bars(scene, width, height, num_bars, colors):
+    bar_width = width / num_bars
+    bar_map = zip(range(num_bars), colors * int(math.ceil(num_bars / len(colors))))
+    for bar_idx, color in bar_map:
+        bar = scene.box(bar_width, height, color)
+        pos = Position(height // 2, int(bar_idx * bar_width - bar_width / 2))
+        yield bar, pos
+
+
+for _ in range(15):
+    for colors in bar_colors:
+        pic = scene.picture()
+        for bar, pos in make_bars(scene, STIM_WIDTH, STIM_HEIGHT, BARS_COUNT, colors):
+            pic.add_part(bar, pos.x, pos.y)
+        pic.present()
+        time.sleep(random.random() * 1.5)
 
 # Cleanup (Is this really necessary?)
-del scen
+del scene
 del pc
