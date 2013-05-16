@@ -31,6 +31,7 @@ pc = PresPy.Presentation_control()
 
 # Open experiment file
 pc.open_experiment("C:\\gaelen-pypres\my-experiment.exp")
+pc.set_subject_id('number 1')
 
 # Run scenario
 scene = pc.run(0)  # (pc.PRESCONTROL1_SHOW_STATUS | pc.PRESCONTROL1_USER_CONTROL | pc.PRESCONTROL1_WRITE_OUTPUT, 0)
@@ -40,20 +41,20 @@ nv = lambda x: x / 239.0
 red = PresPy.rgb_color(colorsys.hls_to_rgb(0.0, 0.5, 1.0))
 green = PresPy.rgb_color(colorsys.hls_to_rgb(0.334, 0.5, 1.0))
 blue = PresPy.rgb_color(colorsys.hls_to_rgb(0.667, 0.5, 1.0))
-bar_colors = ((red, green, blue), (green, blue, red), (blue, red, green))
+bar_colors = ((red, green), (red, blue),)
 
 #green = scen.rgb_color(0, 255, 0)  # Maybe PresPy.rgb_color()
-box_red = scene.box(1024, 768, red)
-box_green = scene.box(1024, 768, green)
-box_blue = scene.box(1024, 768, blue)
+# box_red = scene.box(1024, 768, red)
+# box_green = scene.box(1024, 768, green)
+# box_blue = scene.box(1024, 768, blue)
 
 
 def make_bars(scene, width, height, num_bars, colors):
     bar_width = width / num_bars
     bar_map = zip(range(num_bars), colors * int(math.ceil(num_bars / len(colors))))
     for bar_idx, color in bar_map:
-        bar = scene.box(bar_width, height, color)
-        pos = Position(height // 2, int(bar_idx * bar_width - bar_width / 2))
+        bar = scene.box(width=bar_width, height=height, color=color)
+        pos = Position(int(bar_idx * bar_width - bar_width / 2), height // 2)
         yield bar, pos
 
 
