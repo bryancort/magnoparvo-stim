@@ -28,6 +28,9 @@ class StripeColors(object):
         self.colors = colors
         self._interval = interval
 
+    def __len__(self):
+        return len(self.colors)
+
     @property
     def interval(self):
         return self._interval() if callable(self._interval) else self._interval
@@ -55,4 +58,4 @@ def make_sine_colors(width, phase=(0, 0, 0), amp=128, mid=127):
 
 
 def _rgb_clamp(v):
-    return max(min(255, v), 0)
+    return int(max(min(255, v), 0))

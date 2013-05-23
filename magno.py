@@ -10,7 +10,7 @@ from stimuli import StripeColors, make_bars, make_sine_colors
 
 STIM_WIDTH = 640
 STIM_HEIGHT = 480
-BARS_COUNT = 64
+BARS_COUNT = 1
 
 SINE_PHASE = (0, 0, 0)
 
@@ -38,21 +38,28 @@ scenario = pc.run(0)  # (pc.PRESCONTROL1_SHOW_STATUS | pc.PRESCONTROL1_USER_CONT
 
 #bluegreen = StripeColors(colors=(BLUE_RGB, GREEN_RGB), interval=lambda: random.randint(600, 1000) / 1000.0)
 
-gradients = make_sine_colors(STIM_WIDTH / BARS_COUNT, phase=SINE_PHASE)
+gradients = make_sine_colors(STIM_WIDTH, phase=SINE_PHASE)
 
 bar_colors = []
 for idx in range(BARS_COUNT):
-    gradients = gradients[1:] + gradients[0]
+    gradients = gradients[-1:] + gradients[:-1]
     bar_colors.append(StripeColors(colors=gradients, interval=0.1))
 
 
 for _ in range(60):
-    for stripes in bar_colors:
+    for color in gradients:
         pic = scenario.picture()
-        for bar, pos in make_bars(scenario, STIM_WIDTH, STIM_HEIGHT, BARS_COUNT, stripes.colors):
-            pic.add_part(bar, pos.x, pos.y)
+        box = scenario.box(width=STIM_WIDTH, height=STIM_HEIGHT, color=color)
+        pic.add_part(box, 0, 0)
         pic.present()
-        time.sleep(stripes.interval)
+        time.sleep(0.0005)
+        print color
+##    for stripes in bar_colors:
+##        pic = scenario.picture()
+##        for bar, pos in make_bars(scenario, STIM_WIDTH, STIM_HEIGHT, len(stripes), stripes.colors):
+##            pic.add_part(bar, pos.x, pos.y)
+##        pic.present()
+##        time.sleep(stripes.interval)
 
 # Cleanup (Is this really necessary?)
 del scenario
