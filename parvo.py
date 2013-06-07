@@ -4,16 +4,16 @@
 import random
 
 # local
-from stimuli import Experiment, HorizontalPattern, ColorList, Display
+from stimuli import Experiment, RadialPattern, HorizontalPattern, ColorList, Display
 from stimuli import RED_RGB, GREEN_RGB, BLUE_RGB
 
 STIM_WIDTH = 640
 STIM_HEIGHT = 480
-BARS_COUNT = 64
+BARS_COUNT = 32
 
 
 # Create presentation controller
-exp = Experiment('C:\\gaelen-pypres\my-experiment.exp',
+exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  scenario_type="trials",
                  default_background_color='0,0,0',
                  # screen_height=768,
@@ -29,10 +29,10 @@ exp = Experiment('C:\\gaelen-pypres\my-experiment.exp',
 # Run scenario
 scenario = exp.new_scenario()
 
-bluegreen_patt = HorizontalPattern(colors=ColorList(BLUE_RGB, GREEN_RGB),
+bluegreen_patt = RadialPattern(colors=ColorList([BLUE_RGB, GREEN_RGB]),
                                    num_parts=BARS_COUNT,
                                    interval=lambda: random.randint(600, 1000) / 1000.0)
-redgreen_patt = HorizontalPattern(colors=ColorList(RED_RGB, GREEN_RGB),
+redgreen_patt = RadialPattern(colors=ColorList([RED_RGB, GREEN_RGB]),
                                   num_parts=BARS_COUNT,
                                   interval=0.1)
 

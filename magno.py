@@ -15,7 +15,7 @@ SINE_PHASE = (0, 0, 0)
 
 
 # Create presentation controller
-exp = Experiment('C:\\gaelen-pypres\my-experiment.exp',
+exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  scenario_type="trials",
                  default_background_color='0,0,0',
                  # screen_height=768,
