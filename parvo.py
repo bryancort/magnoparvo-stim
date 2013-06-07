@@ -4,7 +4,7 @@
 import random
 
 # local
-from stimuli import Experiment, RadialPattern, HorizontalPattern, ColorList, Display
+from stimuli import Experiment, HorizontalPattern, ColorList, Display
 from stimuli import RED_RGB, GREEN_RGB, BLUE_RGB
 
 STIM_WIDTH = 640
@@ -16,6 +16,7 @@ BARS_COUNT = 32
 exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  scenario_type="trials",
                  default_background_color='0,0,0',
+                 default_draw_mode='draw_mode_standard',
                  # screen_height=768,
                  # screen_width=1024,
                  # screen_bit_depth=32,
@@ -29,10 +30,10 @@ exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
 # Run scenario
 scenario = exp.new_scenario()
 
-bluegreen_patt = RadialPattern(colors=ColorList([BLUE_RGB, GREEN_RGB]),
+bluegreen_patt = HorizontalPattern(colors=ColorList([BLUE_RGB, GREEN_RGB]),
                                    num_parts=BARS_COUNT,
                                    interval=lambda: random.randint(600, 1000) / 1000.0)
-redgreen_patt = RadialPattern(colors=ColorList([RED_RGB, GREEN_RGB]),
+redgreen_patt = HorizontalPattern(colors=ColorList([RED_RGB, GREEN_RGB]),
                                   num_parts=BARS_COUNT,
                                   interval=0.1)
 

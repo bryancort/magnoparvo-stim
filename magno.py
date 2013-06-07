@@ -18,6 +18,7 @@ SINE_PHASE = (0, 0, 0)
 exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  scenario_type="trials",
                  default_background_color='0,0,0',
+                 default_draw_mode='draw_mode_standard',
                  # screen_height=768,
                  # screen_width=1024,
                  # screen_bit_depth=32,
@@ -25,7 +26,7 @@ exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  # pulse_width=8,
                  # active_buttons=4,
                  # button_codes='1,2,101,101'
-                )
+                 )
 
 
 # Run scenario

@@ -55,25 +55,36 @@ class ColorFunction(object):
     def __init__(self, func, input_min, input_max, interval_rate=1):
         self._func = func
         self.input_range = (input_min, input_max)
-        self._expand_offset = 0
+        self._expand_call_count = 0
         self._interval_rate = interval_rate
+        self._generated_colors = None
 
     def get_color(self, val, *args):
         if val < self.input_range[0] or val > self.input_range[1]:
             print('Warning: ColorFunction input value %r is outside of range %r' % (val, self.input_range))
         return self._func(val, *args)
 
+    def __lshift__(self, shift):
+        self._generated_colors << shift
+
+    def __rshift__(self):
+        self._generated_colors >> shift
+
     def expand(self, pixels_part, pixels_total):
-        colors = []
-        offset = self._expand_offset
-        interval = (self.input_range[1] - self.input_range[0]) / pixels_part
-        print(pixels_part, pixels_total, interval)
+        if not self._generated_colors:
+            colors = []
+            interval = (self.input_range[1] - self.input_range[0]) / pixels_part
 
-        for pixel in range(pixels_part):
-            colors.append(self.get_color((offset + pixel) * interval))
+            for _ in range(int(math.ceil(pixels_total / pixels_part))):
+                for pixel in range(pixels_part):
+                    colors.append(self.get_color(pixel * interval))
 
-        self._expand_offset += self._interval_rate
-        return colors
+            self._generated_colors = ColorList(colors)
+        else:
+            self._generated_colors >> self.interval_rate
+
+        self._expand_call_count += 1
+        return self._generated_colors
 
 
 class ColorList(object):
@@ -86,6 +97,16 @@ class ColorList(object):
 
     def __getitem__(self, i):
         return self._colors[i]
+
+    def __lshift__(self, shift):
+        if not isinstnace(shift, int):
+            raise ValueError('<< value needs to be an int')
+        self._generated_colors = self._generated_colors[shift:] + self._generated_colors[:shift]
+
+    def __rshift__(self, shift):
+        if not isinstnace(shift, int):
+            raise ValueError('>> value needs to be an int')
+        self._generated_colors = self._generated_colors[-shift:] + self._generated_colors[:-shift]
 
 
 class Pattern(object):
@@ -123,12 +144,12 @@ class RadialPattern(Pattern):
             expanded_colors = self.colors.expand(part_width, width)
 
         for idx, color in reversed(list(enumerate(expanded_colors))):
-            eclipse = scenario.ellipse_graphic()
-            eclipse.set_dimensions(eclipse_width=idx*part_width, eclipse_height=idx*part_height)
-            eclipse.set_size(eclipse_width=idx*part_width, eclipse_height=idx*part_height)
-            eclipse.set_color(color)
+            ellipse = scenario.ellipse_graphic()
+            ellipse.set_dimensions(ellipse_width=idx*part_width, ellipse_height=idx*part_height)
+            ellipse.set_size(width=idx*part_width, width=idx*part_height)
+            ellipse.set_color(color)
             pos = Position(0, 0)
-            yield eclipse, pos
+            yield ellipse, pos
 
 
 class HorizontalPattern(Pattern):
@@ -137,23 +158,17 @@ class HorizontalPattern(Pattern):
         num_parts = self.num_parts or width
         part_width = width // num_parts
 
-        if isinstance(self.colors, ColorList):  # fix .colors.colors
+        if isinstance(self.colors, ColorList):
             expanded_colors = (self.colors._colors * int(math.ceil(num_parts / len(self.colors))))[:num_parts]
-
-            left_edge = -width // 2.0
-            for bar_idx, color in enumerate(expanded_colors):
-                bar = scenario.box(width=part_width, height=height, color=color)
-                pos = Position(int(bar_idx * part_width + left_edge), 0)
-                yield bar, pos
 
         elif isinstance(self.colors, ColorFunction):
             expanded_colors = self.colors.expand(part_width, width)
 
-            left_edge = -width // 2.0
-            for bar_idx, color in enumerate(expanded_colors):
-                bar = scenario.box(width=1, height=height, color=color)
-                pos = Position(int(bar_idx * 1 + left_edge), 0)
-                yield bar, pos
+        left_edge = -width // 2.0
+        for bar_idx, color in enumerate(expanded_colors):
+            bar = scenario.box(width=part_width, height=height, color=color)
+            pos = Position(int(bar_idx * part_width + left_edge), 0)
+            yield bar, pos
 
 
 class VerticalPattern(Pattern):
@@ -175,7 +190,7 @@ class Display(object):
             pic.add_part(part, pos.x, pos.y)
         pic.present()
         self._next_pattern_idx = (self._next_pattern_idx + 1) % len(self.patterns)
-        #time.sleep(pattern.interval)
+        time.sleep(pattern.interval)
 
 
 def get_sine_color(x, phase=(0, 0, 0), amp=128, mid=127):
