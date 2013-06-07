@@ -124,9 +124,9 @@ class RadialPattern(Pattern):
 
         for idx, color in reversed(list(enumerate(expanded_colors))):
             eclipse = scenario.ellipse_graphic()
-            eclipse.eclipse_width = idx*part_width
-            eclipse.eclipse_height = idx*part_height
-            eclipse.color = color
+            eclipse.set_dimensions(eclipse_width=idx*part_width, eclipse_height=idx*part_height)
+            eclipse.set_size(eclipse_width=idx*part_width, eclipse_height=idx*part_height)
+            eclipse.set_color(color)
             pos = Position(0, 0)
             yield eclipse, pos
 
