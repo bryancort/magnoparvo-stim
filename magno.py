@@ -1,66 +1,44 @@
 # Motion
 
 # standard
-import random
-import time
+import math
 
 # local
-import PresPy
-from stimuli import StripeColors, make_bars, make_sine_colors
+from stimuli import Experiment, HorizontalPattern, ColorFunction, Display
+from stimuli import get_sine_color
 
-STIM_WIDTH = 640
-STIM_HEIGHT = 480
-BARS_COUNT = 1
+STIM_WIDTH = 800
+STIM_HEIGHT = 600
+WAVE_COUNT = 6
 
 SINE_PHASE = (0, 0, 0)
 
 
 # Create presentation controller
-pc = PresPy.Presentation_control()
+exp = Experiment('C:\\gaelen-pypres\my-experiment.exp',
+                 scenario_type="trials",
+                 default_background_color='0,0,0',
+                 # screen_height=768,
+                 # screen_width=1024,
+                 # screen_bit_depth=32,
+                 write_codes=True,
+                 # pulse_width=8,
+                 # active_buttons=4,
+                 # button_codes='1,2,101,101'
+                )
 
-# Set headers
-pc.set_header_parameter("scenario_type", "trials")
-pc.set_header_parameter('default_background_color', '0,0,0')
-# pc.set_header_parameter('screen_height', 768)
-# pc.set_header_parameter('screen_width', 1024)
-# pc.set_header_parameter('screen_bit_depth', 32)
-pc.set_header_parameter('write_codes', True)
-# pc.set_header_parameter('pulse_width', 8)
-# pc.set_header_parameter('active_buttons', 4)
-# pc.set_header_parameter('button_codes', '1,2,101,101')
-
-# Open experiment file
-pc.open_experiment("C:\\gaelen-pypres\my-experiment.exp")
-# pc.set_subject_id(1)
 
 # Run scenario
-scenario = pc.run(0)  # (pc.PRESCONTROL1_SHOW_STATUS | pc.PRESCONTROL1_USER_CONTROL | pc.PRESCONTROL1_WRITE_OUTPUT, 0)
+scenario = exp.new_scenario()
 
-#bluegreen = StripeColors(colors=(BLUE_RGB, GREEN_RGB), interval=lambda: random.randint(600, 1000) / 1000.0)
+sine_patt = HorizontalPattern(colors=ColorFunction(get_sine_color, 0, 2 * math.pi),
+                              num_parts=WAVE_COUNT,
+                              interval=0.1)
 
-gradients = make_sine_colors(STIM_WIDTH, phase=SINE_PHASE)
 
-bar_colors = []
-for idx in range(BARS_COUNT):
-    gradients = gradients[-1:] + gradients[:-1]
-    bar_colors.append(StripeColors(colors=gradients, interval=0.1))
-
+display = Display(STIM_WIDTH, STIM_HEIGHT, sine_patt)
 
 for _ in range(60):
-    for color in gradients:
-        pic = scenario.picture()
-        box = scenario.box(width=STIM_WIDTH, height=STIM_HEIGHT, color=color)
-        pic.add_part(box, 0, 0)
-        pic.present()
-        time.sleep(0.0005)
-        print color
-##    for stripes in bar_colors:
-##        pic = scenario.picture()
-##        for bar, pos in make_bars(scenario, STIM_WIDTH, STIM_HEIGHT, len(stripes), stripes.colors):
-##            pic.add_part(bar, pos.x, pos.y)
-##        pic.present()
-##        time.sleep(stripes.interval)
+    display.show(scenario)
 
-# Cleanup (Is this really necessary?)
-del scenario
-del pc
+exp.close()
