@@ -81,7 +81,8 @@ class ColorFunction(object):
 
             self._generated_colors = ColorList(colors)
         else:
-            self._generated_colors >> self.interval_rate
+            #self._generated_colors = self._generated_colors[-self._interval_rate:] + self._generated_colors[:-self._interval_rate]
+            self._generated_colors >> self._interval_rate
 
         self._expand_call_count += 1
         return self._generated_colors
@@ -101,12 +102,12 @@ class ColorList(object):
     def __lshift__(self, shift):
         if not isinstance(shift, int):
             raise ValueError('<< value needs to be an int')
-        self._generated_colors = self._generated_colors[shift:] + self._generated_colors[:shift]
+        self._colors = self._colors[shift:] + self._colors[:shift]
 
     def __rshift__(self, shift):
         if not isinstance(shift, int):
             raise ValueError('>> value needs to be an int')
-        self._generated_colors = self._generated_colors[-shift:] + self._generated_colors[:-shift]
+        self._colors = self._colors[-shift:] + self._colors[:-shift]
 
 
 class Pattern(object):
@@ -154,21 +155,33 @@ class RadialPattern(Pattern):
 
 class HorizontalPattern(Pattern):
 
+    _generated_boxes = []
+
     def get_parts(self, scenario, width, height):
         num_parts = self.num_parts or width
         part_width = width // num_parts
 
-        if isinstance(self.colors, ColorList):
-            expanded_colors = (self.colors._colors * int(math.ceil(num_parts / len(self.colors))))[:num_parts]
+        if not self._generated_boxes:
+            if isinstance(self.colors, ColorList):
+                expanded_colors = (self.colors._colors * int(math.ceil(num_parts / len(self.colors))))[:num_parts]
 
-        elif isinstance(self.colors, ColorFunction):
-            expanded_colors = self.colors.expand(part_width, width)
+            elif isinstance(self.colors, ColorFunction):
+                expanded_colors = self.colors.expand(part_width, width)
+                part_width = 1 
 
-        left_edge = -width // 2.0
-        for bar_idx, color in enumerate(expanded_colors):
-            bar = scenario.box(width=part_width, height=height, color=color)
-            pos = Position(int(bar_idx * part_width + left_edge), 0)
-            yield bar, pos
+            left_edge = -width // 2.0
+            for bar_idx, color in enumerate(expanded_colors):
+                bar = scenario.box(width=part_width, height=height, color=color)
+                pos = Position(int(bar_idx * part_width + left_edge), 0)
+                self._generated_boxes.append(bar)
+                yield bar, pos
+        else:
+            left_edge = -width // 2.0
+            pixel_rate = self.colors._interval_rate
+            self._generated_boxes = self._generated_boxes[-pixel_rate:] + self._generated_boxes[:-pixel_rate]
+            for idx, box in enumerate(self._generated_boxes):
+                pos = Position(int(idx + left_edge), 0)
+                yield box, pos
 
 
 class VerticalPattern(Pattern):
@@ -184,13 +197,23 @@ class Display(object):
         self._next_pattern_idx = 0
 
     def show(self, scenario):
+        start = time.time()
         pattern = self.patterns[self._next_pattern_idx]
+        start_pic = time.time()
         pic = scenario.picture()
+        start_gen = time.time()
         for part, pos in pattern.get_parts(scenario, self.width, self.height):
             pic.add_part(part, pos.x, pos.y)
+        start_present = time.time()
         pic.present()
         self._next_pattern_idx = (self._next_pattern_idx + 1) % len(self.patterns)
-        time.sleep(pattern.interval)
+        end = time.time()
+        total = end - start
+        #print('\nTotal:', total, '\nPicture:', start_gen-start_pic, '\nGenerate:', start_present-start_gen, '\nPresent:', end-start_present)
+        if total < pattern.interval:
+            time.sleep(pattern.interval-total)
+        else:
+            print('Running to slow to keep up with interval. actual: %r, expected: %r' % (total, pattern.interval))
 
 
 def get_sine_color(x, phase=(0, 0, 0), amp=128, mid=127):

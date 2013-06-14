@@ -8,9 +8,9 @@ import math
 from stimuli import Experiment, HorizontalPattern, ColorFunction, Display
 from stimuli import get_sine_color
 
-STIM_WIDTH = 800
-STIM_HEIGHT = 600
-WAVE_COUNT = 6
+STIM_WIDTH = 320
+STIM_HEIGHT = 240
+WAVE_COUNT = 4
 
 SINE_PHASE = (0, 0, 0)
 
@@ -18,7 +18,7 @@ SINE_PHASE = (0, 0, 0)
 # Create presentation controller
 exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
                  scenario_type="trials",
-                 default_background_color='0,0,0',
+                 default_background_color='120,120,120',
                  default_draw_mode='draw_mode_standard',
                  # screen_height=768,
                  # screen_width=1024,
@@ -32,8 +32,8 @@ exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
 
 # Run scenario
 scenario = exp.new_scenario()
-time_interval = 0.1
-pixels_per_interval = int(math.ceil(STIM_WIDTH / WAVE_COUNT / time_interval))
+time_interval = 0.05
+pixels_per_interval = 14 
 sine_patt = HorizontalPattern(colors=ColorFunction(get_sine_color, 0, 2*math.pi, interval_rate=pixels_per_interval),
                               num_parts=WAVE_COUNT,
                               interval=time_interval)
@@ -41,7 +41,7 @@ sine_patt = HorizontalPattern(colors=ColorFunction(get_sine_color, 0, 2*math.pi,
 
 display = Display(STIM_WIDTH, STIM_HEIGHT, sine_patt)
 
-for _ in range(60):
+for _ in range(8090):
     display.show(scenario)
 
 exp.close()
