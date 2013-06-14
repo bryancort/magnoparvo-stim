@@ -99,12 +99,12 @@ class ColorList(object):
         return self._colors[i]
 
     def __lshift__(self, shift):
-        if not isinstnace(shift, int):
+        if not isinstance(shift, int):
             raise ValueError('<< value needs to be an int')
         self._generated_colors = self._generated_colors[shift:] + self._generated_colors[:shift]
 
     def __rshift__(self, shift):
-        if not isinstnace(shift, int):
+        if not isinstance(shift, int):
             raise ValueError('>> value needs to be an int')
         self._generated_colors = self._generated_colors[-shift:] + self._generated_colors[:-shift]
 
@@ -146,7 +146,7 @@ class RadialPattern(Pattern):
         for idx, color in reversed(list(enumerate(expanded_colors))):
             ellipse = scenario.ellipse_graphic()
             ellipse.set_dimensions(ellipse_width=idx*part_width, ellipse_height=idx*part_height)
-            ellipse.set_size(width=idx*part_width, width=idx*part_height)
+            ellipse.set_size(width=idx*part_width, height=idx*part_height)
             ellipse.set_color(color)
             pos = Position(0, 0)
             yield ellipse, pos

@@ -1,6 +1,7 @@
 # Motion
 
 # standard
+from __future__ import division
 import math
 
 # local
@@ -31,10 +32,11 @@ exp = Experiment('C:\\gaelen-pypres\magnoparvo-stim\my-experiment.exp',
 
 # Run scenario
 scenario = exp.new_scenario()
-
-sine_patt = HorizontalPattern(colors=ColorFunction(get_sine_color, 0, 2 * math.pi),
+time_interval = 0.1
+pixels_per_interval = int(math.ceil(STIM_WIDTH / WAVE_COUNT / time_interval))
+sine_patt = HorizontalPattern(colors=ColorFunction(get_sine_color, 0, 2*math.pi, interval_rate=pixels_per_interval),
                               num_parts=WAVE_COUNT,
-                              interval=0.1)
+                              interval=time_interval)
 
 
 display = Display(STIM_WIDTH, STIM_HEIGHT, sine_patt)
