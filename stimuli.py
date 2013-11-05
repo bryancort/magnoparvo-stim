@@ -167,7 +167,7 @@ class HorizontalPattern(Pattern):
 
             elif isinstance(self.colors, ColorFunction):
                 expanded_colors = self.colors.expand(part_width, width)
-                part_width = 1 
+                part_width = 1
 
             left_edge = -width // 2.0
             for bar_idx, color in enumerate(expanded_colors):
@@ -228,3 +228,13 @@ def get_sine_color(x, phase=(0, 0, 0), amp=128, mid=127):
 
 def _rgb_clamp(v):
     return int(max(min(255, v), 0))
+
+# trial {
+#    trial_duration = stimuli_length;
+#    stimulus_event {
+#       picture pic1;
+#       duration = 200;
+#       code = "switch";
+# #      port_code=99;port=2;
+#    } main_stim;
+# } main_trial;

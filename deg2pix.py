@@ -31,10 +31,10 @@ stim_w = math.tan(math.radians(deg_w)) * dist * 2
 stim_h = math.tan(math.radians(deg_h)) * dist * 2
 
 print('-- Result --')
-print('Stimuli should be %.2fx%.2f cm' % (stim_w, stim_h))
-print('Stimuli should be %dx%d px' % (stim_w * ratio_w, stim_h * ratio_h))
+print('Stimuli should be %.2fx%.2f cm (%dx%d px)' % (stim_w, stim_h,
+                                                     stim_w * ratio_w, stim_h * ratio_h))
 
 if stim_w == stim_h and (stim_w * ratio_w != stim_h * ratio_h):
-    print(' ** Note: It is unusual for monitors to have different vertical '
+    print(' *** Note: It is unusual for monitors to have different vertical '
           'and horizontal pixel densities. The stimuli pixel width and height '
           'should probably be equal.')
