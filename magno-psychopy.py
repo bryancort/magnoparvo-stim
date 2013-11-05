@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import random
+import os
 import random
 from psychopy import visual, logging, event, core, monitors
 import egi.simple as egi
@@ -10,21 +11,22 @@ import egi.simple as egi
 class Experiment(object):
 
     def __init__(self):
-        self._monitor = get_monitor()
         self._window = get_displayport()
 
-    def _run():
-        segments = [random.randint(600, 1000) / 1000 for _ in range (200)]
-        still_images = []  #['image' for _ in range(6)]
+    def _run(self):
+        segments = [random.randint(600, 1000)/1000.0 for _ in range (200)]
+        still_images = load_image_stims(self._window, '/home/gaelen/workspace/magnoparvo-stim/img')
+        still_images = still_images * 10
+
         plan = segments + still_images
         random.shuffle(plan)
 
         #create a window to draw in
         logging.console.setLevel(logging.DEBUG)
 
-        window = get_displayport()
+        #window = get_displayport()
 
-        horizontal_sine = visual.GratingStim(window,
+        horizontal_sine = visual.GratingStim(self._window,
                                              tex='sin',
                                              units='deg',
                                              sf=1.5,
@@ -34,30 +36,53 @@ class Experiment(object):
         # ms_localtime = egi.ms_localtime
 
         trialClock = core.Clock()
-        t = 0
-        for part in range(300):
+        # t = 0
 
-            if random.random() > .9:
-                old = trialClock.getTime()
-                trialClock.add(part)
-
-                while trialClock.getTime() <= old:
-                    pass
-
+        def move():
             t = trialClock.getTime()
-
-            horizontal_sine.setPhase(4*t)  #drift at 1Hz
+            horizontal_sine.setPhase(4*t)
             horizontal_sine.draw()
-            window.flip()
+            self._window.flip()
 
-            # optionally can perform additional synchronization # ns.sync()
-            # netstat.send_event( 'evt_', label="event", timestamp=egi.ms_localtime(), table = {'fld1' : 123, 'fld2' : "abc", 'fld3' : 0.042} )
+        for current in plan:
+            if not isinstance(plan, float):
+                # Show image
+                current.draw()
+                self._windows.flip()
 
-            for keys in event.getKeys():
-                if keys in ['escape','q']:
-                    core.quit()
+                # Wait for the response
+                pass
+
+                # Wait a random interval
+                timed_op(random.randint(600, 1000)/1000.0)
+            else:
+
+                # Move for 100 ms
+                timed_op(0.1, lambda: move())
+
+                # Pause for however long plan says
+                timed_op(current)
+
+                # optionally can perform additional synchronization # ns.sync()
+                netstat.send_event('evt_',
+                    label="event",
+                    timestamp=egi.ms_localtime(),
+                    table=None)
 
         stop_netstation(netstat)
+
+
+def timed_op(secs, op=None):
+    clock = core.Clock()
+    stop_at = clock.getTime()
+    clock.add(secs)
+
+    while clock.getTime() <= stop_at:
+        if op:
+            op()
+        else:
+            pass
+
 
 def get_monitor():
     mon = monitors.Monitor('Laptop')
@@ -87,6 +112,15 @@ def stop_netstation(netstat):
     netstat.EndSession()
     netstat.disconnect()
 
+
+def load_image_stims(window, dirpath, pos=(-0.5, 0.5)):
+    images = []
+    for fname in os.listdir(dirpath):
+        images.append(window, os.path.join(dirpath, fname), pos)
+
+
+def load_image_stim(window, fpath, pos=(-0.5, 0.5)):
+    return visual.ImageStim(window, image=fpath, pos=pos)
 
 if __name__ == '__main__':
     Experiment()._run()
