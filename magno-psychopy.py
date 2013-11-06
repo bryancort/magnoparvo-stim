@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
-from __future__ import random
+import random
 import os
 import random
 from psychopy import visual, logging, event, core, monitors
 import egi.simple as egi
 # import egi.threaded as egi
 
+
+def get_current_dir():
+    return os.path.dirname(os.path.abspath(__file__))
 
 class Experiment(object):
 
@@ -15,7 +18,7 @@ class Experiment(object):
 
     def _run(self):
         segments = [random.randint(600, 1000)/1000.0 for _ in range (200)]
-        still_images = load_image_stims(self._window, '/home/gaelen/workspace/magnoparvo-stim/img')
+        still_images = load_image_stims(self._window, os.path.join(get_current_dir(), 'img'))
         still_images = still_images * 10
 
         plan = segments + still_images
@@ -45,10 +48,10 @@ class Experiment(object):
             self._window.flip()
 
         for current in plan:
-            if not isinstance(plan, float):
+            if not isinstance(current, float):
                 # Show image
                 current.draw()
-                self._windows.flip()
+                self._window.flip()
 
                 # Wait for the response
                 pass
@@ -86,13 +89,13 @@ def timed_op(secs, op=None):
 
 def get_monitor():
     mon = monitors.Monitor('Laptop')
-    mon.setDistance(60)
-    mon.setSizePix([1440, 900])
-    mon.setWidth(13)
+    mon.setDistance(45)
+    mon.setSizePix([1920, 1200]) #mon.setSizePix([1440, 900])
+    mon.setWidth(24)
     return mon
 
 
-def get_displayport(width=800, height=600):
+def get_displayport(width=1920, height=1200):
     monitor = get_monitor()
     display = visual.Window(size=[width, height], monitor=monitor, allowGUI=False)
     return display
@@ -100,7 +103,7 @@ def get_displayport(width=800, height=600):
 
 def start_netstation():
     netstat = egi.Netstation()
-    netstat.connect('192.168.0.1', 55513)
+    netstat.connect('10.0.0.42', 55513)
     netstat.BeginSession()
     netstat.sync()
     netstat.StartRecording()
@@ -113,14 +116,18 @@ def stop_netstation(netstat):
     netstat.disconnect()
 
 
-def load_image_stims(window, dirpath, pos=(-0.5, 0.5)):
+def load_image_stims(window, dirpath, pos=(0.0, 0.0)):
     images = []
     for fname in os.listdir(dirpath):
-        images.append(window, os.path.join(dirpath, fname), pos)
+        if fname.endswith('.bmp'):
+            img = load_image_stim(window, os.path.join(dirpath, fname), pos)
+            images.append(img)
+    return images
 
 
-def load_image_stim(window, fpath, pos=(-0.5, 0.5)):
+def load_image_stim(window, fpath, pos=(0.0, 0.0)):
     return visual.ImageStim(window, image=fpath, pos=pos)
 
 if __name__ == '__main__':
-    Experiment()._run()
+    exp = Experiment()
+    exp._run()
