@@ -47,10 +47,11 @@ class Experiment(object):
         self._netstation.EndSession()
         self._netstation.disconnect()
 
-    def send_event(self, key='evt_', label=None, table=None):
-        self._netstation.send_event('evt_',
+    def send_event(self, key='evt_', label=None, description=None, table=None):
+        self._netstation.send_event(key,
                     label=label,
                     timestamp=egi.ms_localtime(),
+                    description=description,
                     table=table)
 
     def timed_func(self, frames, func=None):
@@ -108,8 +109,8 @@ class Magno(Experiment):
 
     def run(self):
 
-        segments = [random.randint(36, 60) for _ in range (200)]
-        still_images = self.load_still_images(get_current_dir('img'))
+        segments = [random.randint(36, 60) for _ in range (324)]
+        still_images = (self.load_still_images(get_current_dir('img')) * 2)[:32]
 
         plan = utils.distribute(segments, still_images)
 
@@ -130,33 +131,50 @@ class Magno(Experiment):
         def still():
             horizontal_sine.draw()
 
-        for current in plan:  # [43, 45, 37, 55, image, 36]
+        self.timed_func(60 * 3, still)
+        
+        for current in plan:
             if not isinstance(current, int):
                 # Show image
                 self.timed_func(500, current.draw)
 
                 # Wait for the response
                 self.wait_for_response()
+                self.send_event('resp', label="responded", description='Participant responded to cartoon', table=None)
 
                 # Wait a random interval
-                self.timed_func(random.randint(36, 60), still)
+                post_cartoon = random.randint(36, 60)
+                self.timed_func(post_cartoon, still)
+                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
             else:
                 # Move for 100 ms / 6 frames
+                now = clock.getTime()
                 self.timed_func(6, move)
-
+                self.send_event('stop', label="stopped", description='Sine grating finished pausing', table={'frms': 6})
+                now2 = clock.getTime()
+                
                 # Pause for however long plan says
-                self.timed_func(current*5, still)
+                self.timed_func(current, still)
 
-                # optionally can perform additional synchronization # ns.sync()
-                self.send_event('evt_',
-                    label="event",
-                    #timestamp=egi.ms_localtime(),
-                    table=None)
+                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': current})
+                now3 = clock.getTime()
+                
+                expected =  0.016666666666666667
+                avg1 = (now2-now) / 6
+                avg2 = (now3-now2) / current
+                if avg1 > expected:
+                    print '6 frame avg diff', abs(avg1 - expected) * 1000
+                else:
+                    print '6 frame avg diff', abs(expected - avg1) * 1000
+                if avg2 > expected:
+                    print '%s frame avg diff ' % current, 'diff is', abs(avg2 - expected) * 1000
+                else:
+                    print '%s frame avg diff' % current, 'diff is', abs(expected - avg2) * 1000
 
         self.stop_netstation()
 
 
 if __name__ == '__main__':
     exp = Magno()
-    exp.init_display('run-station')
+    exp.init_display('run-station', 800, 600)
     exp.run()
