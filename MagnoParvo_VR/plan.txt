@@ -1,4 +1,0 @@
-
-
-For 4/4/13
- + Test HSL red green blue for luminance. (isoluminance)
