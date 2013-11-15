@@ -23,7 +23,7 @@ def get(name):
     if name not in _LAB_MONITORS:
         raise ValueError("Unknown monitor '%s'. Expecting %s" % _LAB_MONITORS.keys())
     mon = Monitor(name)
-    # mon.setDistance(45)
+    mon.setDistance(45)
     mon.setSizePix(_LAB_MONITORS[name]['resolution'])
     mon.setWidth(_LAB_MONITORS[name]['diagonal'])
     return mon
