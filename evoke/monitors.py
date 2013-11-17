@@ -1,4 +1,7 @@
 
+#standard
+from __future__ import print_function, division
+
 # vendor
 from psychopy.monitors import Monitor
 

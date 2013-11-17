@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 # standard
+from __future__ import print_function, division
 import random
 import os
-import time
 
 # vendor
-from psychopy import visual, logging, event, core
+from psychopy import visual, logging, core
 import egi.simple as egi
 # import egi.threaded as egi
 
@@ -42,6 +42,10 @@ class Experiment(object):
         self._window = visual.Window(size=[width, height],
                                      monitor=self._monitor,
                                      allowGUI=False)
+
+        if self._debug:
+            self._window.setRecordFrameIntervals(True)
+            self._window._refreshThreshold = 1/60.0 + 0.004
 
     def init_controller(self, controller):
         self._controller = controllers.get(controller)
@@ -100,8 +104,11 @@ class Magno(Experiment):
 
     def run(self):
 
-        segments = [random.randint(36, 60) for _ in range (324)]
-        still_images = (self.load_still_images(get_current_dir('img')) * 2)[:32]
+        # Create stimuli
+        segments = [random.randint(36, 60) for _ in range(324)]
+        still_images = self.load_still_images(get_current_dir('img'))[:32]
+        while len(still_images) < 32:
+            still_images.append(random.choice(still_images))
 
         plan = utils.distribute(segments, still_images)
 
@@ -151,7 +158,7 @@ class Magno(Experiment):
 
 
 if __name__ == '__main__':
-    exp = Magno()
+    exp = Magno(debug=True)
     exp.init_display('run-station', 800, 600)
     exp.init_controller('cedrus')
-    exp.run(debug=True)
+    exp.run()

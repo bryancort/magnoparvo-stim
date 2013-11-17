@@ -1,4 +1,7 @@
 
+#standard
+from __future__ import print_function, division
+
 # vendor
 import pyxid
 from psychopy.core import Clock
