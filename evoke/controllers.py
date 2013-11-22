@@ -36,7 +36,6 @@ class Cedrus(Controller):
 
     def wait_for_response(self, buttons=None, timeout=None):
         buttons = utils.as_list(buttons)
-        # clear queue here
 
         if timeout:
             timer = Clock()
@@ -46,8 +45,9 @@ class Cedrus(Controller):
 
         while check():
             self._device.poll_for_response()
-            if self._device.response_queue_size() > 0:
+            if self._device.response_queue_size() >= 2:
                 response = self._device.get_next_response()
+                self._device.clear_response_queue()
                 if (buttons and response in buttons) or (not buttons and response):
                     return True
 
@@ -72,5 +72,5 @@ def get(name):
     name = name.lower()
     if name not in _LAB_CONTROLLERS:
         raise ValueError("Unknown controllers '%s'. Expecting %s" % _LAB_CONTROLLERS.keys())
-    contr = _LAB_CONTROLLERS[name]()
+    contr = _LAB_CONTROLLERS[name]['class']()
     return contr

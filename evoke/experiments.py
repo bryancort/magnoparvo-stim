@@ -80,7 +80,7 @@ class Experiment(object):
         return visual.ImageStim(self._window, image=fpath, pos=pos)
 
     def wait_for_response(self, buttons=None):
-        return self._control_box.wait_for_response()
+        return self._controller.wait_for_response()
 
     def run(self):
         raise NotImplementedError()
