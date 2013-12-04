@@ -1,93 +1,113 @@
 #!/usr/bin/env python
 
-from __future__ import random
+# standard
+from __future__ import print_function, division
 import random
-from psychopy import visual, logging, event, core, monitors
-import egi.simple as egi
-# import egi.threaded as egi
+import os
+import sys
+if sys.platform == 'win32':
+    sys.path.append('C:\\gaelen\\magnoparvo-stim')
+
+# vendor
+from psychopy import visual
+
+# local
+from evoke.experiments import Experiment
+from evoke import utils
 
 
-class Experiment(object):
+def get_current_dir(append=None):
+    path = os.path.dirname(os.path.abspath(__file__))
+    if append:
+        path = os.path.join(path, append)
+    return path
 
-    def __init__(self):
-        self._monitor = get_monitor()
-        self._window = get_displayport()
 
-    def _run():
-        segments = [random.randint(600, 1000) / 1000 for _ in range(200)]
-        still_images = []  # ['image' for _ in range(6)]
-        plan = segments + still_images
-        random.shuffle(plan)
+class Parvo(Experiment):
 
-        #create a window to draw in
-        logging.console.setLevel(logging.DEBUG)
+    def run(self):
 
-        window = get_displayport()
+        # Create stimuli
+        segments = [random.randint(36, 60) for _ in range(320)]
+        still_images = self.load_still_images(get_current_dir('img'))[:32]
 
-        horizontal_sine = visual.GratingStim(window,
-                                             tex='sin',
-                                             units='deg',
-                                             sf=1.5,
-                                             size=2)
-        netstat = start_netstation()
-        # ms_localtime = egi.egi_internal.ms_localtime
-        # ms_localtime = egi.ms_localtime
+        while len(still_images) < 32:
+            still_images = 2 * still_images
+        still_images = still_images[:32]
+        random.shuffle(still_images)
 
-        trialClock = core.Clock()
-        t = 0
-        for part in range(300):
+        plan = utils.distribute(segments, still_images)
 
-            if random.random() > .9:
-                old = trialClock.getTime()
-                trialClock.add(part)
+        std_stim = visual.GratingStim(self._window,
+                                      tex='sqr',
+                                      texRes=256,
+                                      units='deg',
+                                      sf=1.5,
+                                      size=2)
 
-                while trialClock.getTime() <= old:
-                    pass
+        dev_stim = visual.GratingStim(self._window,
+                                      tex='sqr',
+                                      texRes=256,
+                                      units='deg',
+                                      sf=1.5,
+                                      size=2)
+        # horizontal_sine.setUseShader(True)
 
-            t = trialClock.getTime()
+        self.start_netstation()
 
-            horizontal_sine.setPhase(4*t)  # drift at 1Hz
+        def move():
+            # horizontal_sine.setPhase(4*t)
+            horizontal_sine.setPhase(0.06666666666666667, '+')
             horizontal_sine.draw()
-            window.flip()
 
-            # optionally can perform additional synchronization # ns.sync()
-            # netstat.send_event( 'evt_', label="event", timestamp=egi.ms_localtime(), table = {'fld1' : 123, 'fld2' : "abc", 'fld3' : 0.042} )
+        def still():
+            horizontal_sine.draw()
 
-            for keys in event.getKeys():
-                if keys in ['escape', 'q']:
-                    core.quit()
+        # Directions
+        slide1 = self.load_text_slide("Welcome and thank you for coming today.")
+        slide2 = self.load_text_slide("You will see a box in the center of the "
+            "screen or a Toy Story character. When you see a Toy Story "
+            "character push the button on the button box. That's all "
+            "you have to do. When you are ready, push the button to "
+            "begin.")
+        self.timed_func(utils.ms_to_frames(4000, 60), lambda: slide1.draw())
+        slide2.draw()
+        self.wait_for_response()
 
-        stop_netstation(netstat)
+        # Fixation
+        fixation = self.load_fixation_cross()
+        self.timed_func(utils.ms_to_frames(1000, 60), lambda: fixation.draw())
 
+        # Pre-stim
+        self.timed_func(random.randint(600, 1000), still)
 
-def get_monitor():
-    mon = monitors.Monitor('Laptop')
-    mon.setDistance(60)
-    mon.setSizePix([1440, 900])
-    mon.setWidth(13)
-    return mon
+        for current in plan:
+            if not isinstance(current, int):
+                # Show image
+                self.timed_func(15, current.draw)
 
+                # Wait for the response
+                self.wait_for_response()
+                self.send_event('resp', label="responded", description='Participant responded to cartoon', table=None)
 
-def get_displayport(width=800, height=600):
-    monitor = get_monitor()
-    display = visual.Window(size=[width, height], monitor=monitor, allowGUI=False)
-    return display
+                # Wait a random interval
+                post_cartoon = random.randint(36, 60)
+                self.timed_func(post_cartoon, still)
+                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
+            else:
+                # Move for 100 ms / 6 frames
+                self.timed_func(6, move)
+                self.send_event('stop', label="stopped", description='Sine grating finished pausing', table={'frms': 6})
 
+                # Pause for however long plan says
+                self.timed_func(current, still)
+                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': current})
 
-def start_netstation():
-    netstat = egi.Netstation()
-    netstat.connect('192.168.0.1', 55513)
-    netstat.BeginSession()
-    netstat.sync()
-    netstat.StartRecording()
-    return netstat
-
-
-def stop_netstation(netstat):
-    netstat.StopRecording()
-    netstat.EndSession()
-    netstat.disconnect()
+        self.stop_netstation()
 
 
 if __name__ == '__main__':
-    Experiment()._run()
+    exp = Parvo(debug=True)
+    exp.init_display('run-station', 800, 600)
+    exp.init_controller('cedrus')
+    exp.run()

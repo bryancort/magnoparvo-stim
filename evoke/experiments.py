@@ -30,8 +30,8 @@ class Experiment(object):
     def init_display(self, monitor, width=1920, height=1200):
         self._monitor = monitors.get(monitor)
         self._window = visual.Window(size=[width, height],
-                                     monitor=self._monitor,
-                                     allowGUI=False)
+            monitor=self._monitor,
+            allowGUI=False)
 
         if self._debug:
             self._window.setRecordFrameIntervals(True)
@@ -54,10 +54,10 @@ class Experiment(object):
 
     def send_event(self, key='evt_', label=None, description=None, table=None):
         self._netstation.send_event(key,
-                    label=label,
-                    timestamp=egi.ms_localtime(),
-                    description=description,
-                    table=table)
+            label=label,
+            timestamp=egi.ms_localtime(),
+            description=description,
+            table=table)
 
     def timed_func(self, frames, func=None):
         # Assumes a refresh rate of 60 kHz
@@ -88,3 +88,25 @@ class Experiment(object):
     def release(self):
         self._windows.close()
         core.quit()
+
+    def load_text_slide(self, text, pos=(0, 0)):
+        slide = visual.TextStim(self._window,
+            text=text,
+            height=1.5,
+            font=('Times', 'Times New Roman'),
+            color='white',
+            pos=pos,
+            alignHoriz='center',
+            alignVert='center')
+        return slide
+
+    def load_fixation_cross(frames, pos=(0, 0)):
+        fixation = visual.TextStim(self._window,
+            height=2.0,
+            text=u'+',
+            font=('Times', 'Times New Roman'),
+            color='white',
+            pos=pos,
+            alignHoriz='center',
+            alignVert='center')
+        return fixation

@@ -13,8 +13,6 @@ from psychopy import visual
 
 # local
 from evoke.experiments import Experiment
-from evoke import controllers
-from evoke import monitors
 from evoke import utils
 
 
@@ -58,7 +56,23 @@ class Magno(Experiment):
         def still():
             horizontal_sine.draw()
 
-        self.timed_func(60 * 3, still)
+        # Directions
+        slide1 = self.load_text_slide("Welcome and thank you for coming today.")
+        slide2 = self.load_text_slide("You will see a box in the center of the "
+            "screen or a Toy Story character. When you see a Toy Story "
+            "character push the button on the button box. That's all "
+            "you have to do. When you are ready, push the button to "
+            "begin.")
+        self.timed_func(utils.ms_to_frames(4000, 60), lambda: slide1.draw())
+        slide2.draw()
+        self.wait_for_response()
+
+        # Fixation
+        fixation = self.load_fixation_cross()
+        self.timed_func(utils.ms_to_frames(1000, 60), lambda: fixation.draw())
+
+        # Pre-stim
+        self.timed_func(random.randint(600, 1000), still)
 
         for current in plan:
             if not isinstance(current, int):
