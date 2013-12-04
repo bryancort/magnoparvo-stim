@@ -49,7 +49,7 @@ class Experiment(object):
 
     def stop_netstation(self):
         self._netstation.StopRecording()
-        self._netstation.EndSession()
+        # self._netstation.EndSession()
         self._netstation.disconnect()
 
     def send_event(self, key='evt_', label=None, description=None, table=None):
@@ -92,20 +92,21 @@ class Experiment(object):
     def load_text_slide(self, text, pos=(0, 0)):
         slide = visual.TextStim(self._window,
             text=text,
-            height=1.5,
+            height=0.1,
+            wrapWidth=1.5,
             font=('Times', 'Times New Roman'),
-            color='white',
+            color='black',
             pos=pos,
             alignHoriz='center',
             alignVert='center')
         return slide
 
-    def load_fixation_cross(frames, pos=(0, 0)):
+    def load_fixation_cross(self, pos=(0, 0)):
         fixation = visual.TextStim(self._window,
-            height=2.0,
+            height=0.4,
             text=u'+',
             font=('Times', 'Times New Roman'),
-            color='white',
+            color='black',
             pos=pos,
             alignHoriz='center',
             alignVert='center')
