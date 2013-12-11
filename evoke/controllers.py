@@ -18,7 +18,11 @@ class Controller(object):
 
 
 class Keyboard(Controller):
-    pass
+
+    def wait_for_response(self, buttons=None, timeout=None):
+        for keys in event.getKeys(timeStamped=True):
+            if keys[0] in buttons:
+                break
 
 
 class Mouse(Controller):

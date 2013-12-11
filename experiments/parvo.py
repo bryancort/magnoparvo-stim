@@ -39,14 +39,14 @@ class Parvo(Experiment):
         plan = utils.distribute(segments, still_images)
 
         std_stim = visual.GratingStim(self._window,
-                                      tex='sqr',
+                                      tex=ps.path.join(get_current_dir('img'), 'blue-green.png'),
                                       texRes=256,
                                       units='deg',
                                       sf=1.5,
                                       size=2)
 
         dev_stim = visual.GratingStim(self._window,
-                                      tex='sqr',
+                                      tex=ps.path.join(get_current_dir('img'), 'red-green.png'),
                                       texRes=256,
                                       units='deg',
                                       sf=1.5,
@@ -55,14 +55,6 @@ class Parvo(Experiment):
 
         self.start_netstation()
 
-        def move():
-            # horizontal_sine.setPhase(4*t)
-            horizontal_sine.setPhase(0.06666666666666667, '+')
-            horizontal_sine.draw()
-
-        def still():
-            horizontal_sine.draw()
-
         # Directions
         slide1 = self.load_text_slide("Welcome and thank you for coming today.")
         slide2 = self.load_text_slide("You will see a box in the center of the "
@@ -70,16 +62,16 @@ class Parvo(Experiment):
             "character push the button on the button box. That's all "
             "you have to do. When you are ready, push the button to "
             "begin.")
-        self.timed_func(utils.ms_to_frames(4000, 60), lambda: slide1.draw())
+        self.timed_func(utils.ms_to_frames(4000, 60), slide1.draw)
         slide2.draw()
         self.wait_for_response()
 
         # Fixation
         fixation = self.load_fixation_cross()
-        self.timed_func(utils.ms_to_frames(1000, 60), lambda: fixation.draw())
+        self.timed_func(utils.ms_to_frames(1000, 60), fixation.draw)
 
         # Pre-stim
-        self.timed_func(random.randint(600, 1000), still)
+        self.timed_func(random.randint(600, 1000), std_stim.draw)
 
         for current in plan:
             if not isinstance(current, int):
@@ -92,15 +84,15 @@ class Parvo(Experiment):
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
-                self.timed_func(post_cartoon, still)
+                self.timed_func(post_cartoon, std_stim.draw)
                 self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
             else:
-                # Move for 100 ms / 6 frames
-                self.timed_func(6, move)
+                # Flash for 100 ms / 6 frames
+                self.timed_func(6, dev_stim.draw)
                 self.send_event('stop', label="stopped", description='Sine grating finished pausing', table={'frms': 6})
 
                 # Pause for however long plan says
-                self.timed_func(current, still)
+                self.timed_func(current, std_stim.draw)
                 self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': current})
 
         self.stop_netstation()
