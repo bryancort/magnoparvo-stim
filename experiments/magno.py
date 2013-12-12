@@ -49,7 +49,8 @@ class Magno(Experiment):
         self.start_netstation()
 
         def move():
-            horizontal_sine.setPhase(0.06666666666666667, '+')
+            #horizontal_sine.setPhase(0.06666666666666667, '+')
+            horizontal_sine.setPhase(0.2, '+')  # 1/60.0
             horizontal_sine.draw()
 
         def still():

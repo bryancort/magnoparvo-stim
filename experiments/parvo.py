@@ -39,39 +39,40 @@ class Parvo(Experiment):
         plan = utils.distribute(segments, still_images)
 
         std_stim = visual.GratingStim(self._window,
-                                      tex=ps.path.join(get_current_dir('img'), 'blue-green.png'),
+                                      tex=os.path.join(get_current_dir('img'), 'blue-green.png'),
                                       texRes=256,
                                       units='deg',
-                                      sf=1.5,
+                                      sf=5.25,
                                       size=2)
 
         dev_stim = visual.GratingStim(self._window,
-                                      tex=ps.path.join(get_current_dir('img'), 'red-green.png'),
+                                      tex=os.path.join(get_current_dir('img'), 'red-green.png'),
                                       texRes=256,
                                       units='deg',
-                                      sf=1.5,
+                                      sf=5.25,
                                       size=2)
         # horizontal_sine.setUseShader(True)
 
         self.start_netstation()
 
         # Directions
-        slide1 = self.load_text_slide("Welcome and thank you for coming today.")
+        slide1 = self.load_text_slide("Welcome and thank you\nfor coming today.")
         slide2 = self.load_text_slide("You will see a box in the center of the "
             "screen or a Toy Story character. When you see a Toy Story "
-            "character push the button on the button box. That's all "
+            "character push the button on the button box.\n\nThat's all "
             "you have to do. When you are ready, push the button to "
             "begin.")
         self.timed_func(utils.ms_to_frames(4000, 60), slide1.draw)
         slide2.draw()
+        self._window.flip()
         self.wait_for_response()
 
         # Fixation
         fixation = self.load_fixation_cross()
-        self.timed_func(utils.ms_to_frames(1000, 60), fixation.draw)
+        self.timed_func(utils.ms_to_frames(2000, 60), fixation.draw)
 
         # Pre-stim
-        self.timed_func(random.randint(600, 1000), std_stim.draw)
+        self.timed_func(utils.ms_to_frames(random.randint(600, 1000), 60), std_stim.draw)
 
         for current in plan:
             if not isinstance(current, int):
