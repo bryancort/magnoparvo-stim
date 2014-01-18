@@ -12,7 +12,7 @@ if sys.platform == 'win32':
 from psychopy import visual
 
 # local
-from evoke.experiments import Experiment
+from evoke.experiments import BaseExperiment
 from evoke import utils
 
 
@@ -23,13 +23,13 @@ def get_current_dir(append=None):
     return path
 
 
-class Magno(Experiment):
+class Magno(BaseExperiment):
 
     def run(self):
 
         # Create stimuli
         segments = [random.randint(36, 60) for _ in range(320)]
-        still_images = self.load_still_images(get_current_dir('img'))[:32]
+        still_images = self.load_still_images(get_current_dir('img'), size=2)[:32]
 
         while len(still_images) < 32:
             still_images = 2 * still_images
@@ -106,6 +106,6 @@ class Magno(Experiment):
 
 if __name__ == '__main__':
     exp = Magno(debug=True)
-    exp.init_display('run-station', 800, 600)
+    exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()

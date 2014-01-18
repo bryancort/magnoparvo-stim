@@ -6,7 +6,7 @@ import types
 import warnings
 
 # local
-from .. import settings
+#from .. import settings
 
 
 def as_list(val):
@@ -35,10 +35,10 @@ def distribute(list1, list2):
 def ms_to_frames(ms, freq, as_int=True):
     raw = ms * freq / 1000
     retval = int(round(raw)) if as_int else raw
-    if settings.DEBUG and retval != raw:
-        warnings.warn('Conversion from ms to frames resulted in '
-            'non-integer number of frames. The value was truncated '
-            'to an int and will not result in accurate timing.')
+#    if settings.DEBUG and retval != raw:
+#        warnings.warn('Conversion from ms to frames resulted in '
+#            'non-integer number of frames. The value was truncated '
+#            'to an int and will not result in accurate timing.')
     return retval
 
 

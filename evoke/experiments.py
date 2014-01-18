@@ -44,12 +44,12 @@ class BaseExperiment(object):
             self._window._refreshThreshold = 1/60.0 + 0.004
 
     def init_controller(self, controller):
-        self._controller = controllers.get(controller)
+        self._controller = controllers.get(controller, window=self._window)
 
     def start_netstation(self):
         try:
             self._netstation = egi.Netstation()
-            self._netstation.connect('10.0.0.42', 55513)
+            self._netstation.connect('11.0.0.42', 55513)
             self._netstation.BeginSession()
             self._netstation.sync()
             self._netstation.StartRecording()
@@ -79,22 +79,22 @@ class BaseExperiment(object):
             else:
                 self._window.flip(clearBuffer=False)
 
-    def load_still_images(self, dirpath, pos=(0.0, 0.0)):
+    def load_still_images(self, dirpath, pos=(0.0, 0.0), size=None):
         images = []
         for fname in os.listdir(dirpath):
             if fname.endswith('.jpg'):
-                img = self.load_still_image(os.path.join(dirpath, fname), pos)
+                img = self.load_still_image(os.path.join(dirpath, fname),
+                                            pos, size)
                 images.append(img)
         return images
 
-    def load_still_image(self, fpath, pos=(0.0, 0.0)):
+    def load_still_image(self, fpath, pos=(0.0, 0.0), size=None):
         img = visual.ImageStim(self._window,
             image=fpath,
             pos=pos,
             units='deg')
-        img.setSize(newSize=(2, 2),
-            operation='=',
-            log=True)
+        if size:
+            img.size = 2
         return img
 
     def wait_for_response(self, buttons=None):
