@@ -86,21 +86,25 @@ class Parvo(Experiment):
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
                 self.timed_func(post_cartoon, std_stim.draw)
-                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
+                self.send_event('stnd', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
             else:
                 # Flash for 100 ms / 6 frames
                 self.timed_func(6, dev_stim.draw)
-                self.send_event('stop', label="stopped", description='Sine grating finished pausing', table={'frms': 6})
+                self.send_event('flsh', label="stopped", description='Red bars displayed', table={'frms': 6})
 
                 # Pause for however long plan says
                 self.timed_func(current, std_stim.draw)
-                self.send_event('move', label="moved", description='Sine grating finished moving', table={'frms': current})
+                self.send_event('stnd', label="moved", description='Blue green bars displayed', table={'frms': current})
 
         self.stop_netstation()
 
 
 if __name__ == '__main__':
     exp = Parvo(debug=True)
+    exp.prerun()
+    exp.run()
+    exp.postrun()
+
     exp.init_display('run-station', 800, 600)
     exp.init_controller('cedrus')
     exp.run()

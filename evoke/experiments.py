@@ -4,7 +4,7 @@ from __future__ import print_function, division
 import os
 
 # vendor
-from psychopy import visual, logging, core
+from psychopy import visual, logging, core, gamma
 import egi.simple as egi
 # import egi.threaded as egi
 
@@ -13,7 +13,7 @@ from evoke import controllers
 from evoke import monitors
 
 
-class Experiment(object):
+class BaseExperiment(object):
 
     def __init__(self, debug=False):
         self._monitor = None
@@ -27,11 +27,17 @@ class Experiment(object):
         else:
             logging.console.setLevel(logging.WARNING)
 
-    def init_display(self, monitor, width=1920, height=1200):
+    def init_display(self, monitor, width=800, height=600):
         self._monitor = monitors.get(monitor)
         self._window = visual.Window(size=[width, height],
             monitor=self._monitor,
+            winType='pyglet',
+            waitBlanking=True,  # Default is True
+            allowStencil=True,
+            fullscr=False,  # True is faster
             allowGUI=False)
+
+        gamma.createLinearRamp(self._window, rampType=None)
 
         if self._debug:
             self._window.setRecordFrameIntervals(True)
@@ -41,11 +47,17 @@ class Experiment(object):
         self._controller = controllers.get(controller)
 
     def start_netstation(self):
-        self._netstation = egi.Netstation()
-        self._netstation.connect('10.0.0.42', 55513)
-        self._netstation.BeginSession()
-        self._netstation.sync()
-        self._netstation.StartRecording()
+        try:
+            self._netstation = egi.Netstation()
+            self._netstation.connect('10.0.0.42', 55513)
+            self._netstation.BeginSession()
+            self._netstation.sync()
+            self._netstation.StartRecording()
+        except Exception as exc:
+            if self._debug:
+                logging.debug('Unable to access Netstation: %s' % exc)
+            else:
+                raise
 
     def stop_netstation(self):
         self._netstation.StopRecording()
@@ -60,13 +72,12 @@ class Experiment(object):
             table=table)
 
     def timed_func(self, frames, func=None):
-        # Assumes a refresh rate of 60 kHz
         for _ in range(frames):
             if func:
                 func()
+                self._window.flip()
             else:
-                pass
-            self._window.flip()
+                self._window.flip(clearBuffer=False)
 
     def load_still_images(self, dirpath, pos=(0.0, 0.0)):
         images = []
@@ -77,13 +88,17 @@ class Experiment(object):
         return images
 
     def load_still_image(self, fpath, pos=(0.0, 0.0)):
-        return visual.ImageStim(self._window, image=fpath, pos=pos)
+        img = visual.ImageStim(self._window,
+            image=fpath,
+            pos=pos,
+            units='deg')
+        img.setSize(newSize=(2, 2),
+            operation='=',
+            log=True)
+        return img
 
     def wait_for_response(self, buttons=None):
         return self._controller.wait_for_response()
-
-    def run(self):
-        raise NotImplementedError()
 
     def release(self):
         self._windows.close()
@@ -111,3 +126,6 @@ class Experiment(object):
             alignHoriz='center',
             alignVert='center')
         return fixation
+
+    def run(self):
+        raise NotImplementedError()

@@ -18,15 +18,21 @@ _LAB_MONITORS = {
 }
 
 
-def get(name):
+def get(name, dist_cm=60):
     """
     Returns configured monitor object for known monitor names.
     """
     name = name.lower()
     if name not in _LAB_MONITORS:
         raise ValueError("Unknown monitor '%s'. Expecting %s" % _LAB_MONITORS.keys())
-    mon = Monitor(name)
-    mon.setDistance(62)
+
+    try:
+        mon = Monitor(name)
+    except Exception as exc:
+        raise IOError("Could not initialize monitor '%s': %s" % (name, exc))
+
+    mon.setDistance(dist_cm)
     mon.setSizePix(_LAB_MONITORS[name]['resolution'])
     mon.setWidth(_LAB_MONITORS[name]['diagonal'])
+
     return mon

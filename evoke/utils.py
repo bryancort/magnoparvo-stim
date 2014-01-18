@@ -1,9 +1,12 @@
 
 # standard
-from __future__ import print_function, division
+from __future__ import absolute_import, print_function, division
 import random
 import types
 import warnings
+
+# local
+from .. import settings
 
 
 def as_list(val):
@@ -31,8 +34,8 @@ def distribute(list1, list2):
 
 def ms_to_frames(ms, freq, as_int=True):
     raw = ms * freq / 1000
-    retval = int(raw) if as_int else raw
-    if retval != raw:
+    retval = int(round(raw)) if as_int else raw
+    if settings.DEBUG and retval != raw:
         warnings.warn('Conversion from ms to frames resulted in '
             'non-integer number of frames. The value was truncated '
             'to an int and will not result in accurate timing.')
@@ -41,3 +44,8 @@ def ms_to_frames(ms, freq, as_int=True):
 
 def frames_to_ms(frames, freq):
     return frames / freq
+
+
+def rand_frame_interval(start_ms, end_ms, freq):
+    val = random.randint(start_ms, end_ms)
+    return ms_to_frames(val, freq)
