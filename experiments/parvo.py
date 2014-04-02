@@ -29,7 +29,7 @@ class Parvo(Experiment):
 
         # Create stimuli
         segments = [random.randint(36, 60) for _ in range(320)]
-        still_images = self.load_still_images(get_current_dir('img'))[:32]
+        still_images = self.load_still_images(get_current_dir('img/set2'))[:32]
 
         while len(still_images) < 32:
             still_images = 2 * still_images
@@ -52,6 +52,11 @@ class Parvo(Experiment):
                                       sf=5.25,
                                       size=2)
         # horizontal_sine.setUseShader(True)
+
+        if self._with_timing_test:
+            timing_box = load_timing_box()
+        else:
+            timing_box = None
 
         self.start_netstation()
 
@@ -81,20 +86,22 @@ class Parvo(Experiment):
 
                 # Wait for the response
                 self.wait_for_response()
-                self.send_event('resp', label="responded", description='Participant responded to cartoon', table=None)
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
                 self.timed_func(post_cartoon, std_stim.draw)
-                self.send_event('stnd', label="moved", description='Sine grating finished moving', table={'frms': post_cartoon})
             else:
+                self.send_event(
+                    'flsh',
+                    label="Flash",
+                    description='Starting the red bar flash',
+                    table={'frms': 6}
+                )
                 # Flash for 100 ms / 6 frames
                 self.timed_func(6, dev_stim.draw)
-                self.send_event('flsh', label="stopped", description='Red bars displayed', table={'frms': 6})
 
                 # Pause for however long plan says
                 self.timed_func(current, std_stim.draw)
-                self.send_event('stnd', label="moved", description='Blue green bars displayed', table={'frms': current})
 
         self.stop_netstation()
 

@@ -15,12 +15,13 @@ from evoke import monitors
 
 class BaseExperiment(object):
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, with_timing_test=False):
         self._monitor = None
         self._window = None
         self._netstation = None
         self._controller = None
         self._debug = debug
+        self._with_timing_test = with_timing_test
 
         if debug:
             logging.console.setLevel(logging.DEBUG)
@@ -119,13 +120,22 @@ class BaseExperiment(object):
     def load_fixation_cross(self, pos=(0, 0)):
         fixation = visual.TextStim(self._window,
             height=0.4,
-            text=u'+',
+            text=u'\u2694',
             font=('Times', 'Times New Roman'),
             color='black',
             pos=pos,
             alignHoriz='center',
             alignVert='center')
         return fixation
+
+    def load_timing_box(self, pos=(0, 0)):
+        timing_box = visual.GratingStim(
+            self._window,
+            color=(1, 1, 1),
+            colorSpace='rgb',
+            pos=(-1, 1),
+            sf=0)
+        return timing_box
 
     def run(self):
         raise NotImplementedError()

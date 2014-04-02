@@ -29,7 +29,7 @@ class Magno(BaseExperiment):
 
         # Create stimuli
         segments = [random.randint(36, 60) for _ in range(320)]
-        still_images = self.load_still_images(get_current_dir('img'), size=2)[:32]
+        still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
 
         while len(still_images) < 32:
             still_images = 2 * still_images
@@ -46,11 +46,17 @@ class Magno(BaseExperiment):
                                              size=2)
         # horizontal_sine.setUseShader(True)
 
+        if self._with_timing_test:
+            timing_box = load_timing_box()
+        else:
+            timing_box = None
+
         self.start_netstation()
 
         def move():
+            timing_box and timing_box.draw()
             #horizontal_sine.setPhase(0.06666666666666667, '+')
-            horizontal_sine.setPhase(0.2, '+')  # 1/60.0
+            horizontal_sine.setPhase(0.22, '+')  # 1/60.0
             horizontal_sine.draw()
 
         def still():
@@ -77,28 +83,33 @@ class Magno(BaseExperiment):
 
         trials = 1
         stills = 1
-        for current in plan:
+        for idx, current in enumerate(plan):
+            if idx % 20 == 0:
+                self.wait_for_response()
+
             if not isinstance(current, int):
                 # Show image
                 self.timed_func(15, current.draw)
 
                 # Wait for the response
                 self.wait_for_response()
-                self.send_event('resp', label="responded", description='Responded to cartoon', table={'cntr': stills})
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
                 self.timed_func(post_cartoon, still)
-                self.send_event('move', label="stopped", description='Grating stopped', table={'frms': post_cartoon})
                 stills += 1
             else:
+                self.send_event(
+                    'move',
+                    label="Moving",
+                    description='Grating is about to move',
+                    table={'frms': current, 'cntr': trials}
+                )
                 # Move for 100 ms / 6 frames
                 self.timed_func(6, move)
-                self.send_event('stop', label="moved", description='Grating moved', table={'frms': 6, 'cntr': trials})
 
                 # Pause for however long plan says
                 self.timed_func(current, still)
-                self.send_event('move', label="stopped", description='Grating stopped', table={'frms': current, 'cntr': trials})
                 trials += 1
 
         self.stop_netstation()

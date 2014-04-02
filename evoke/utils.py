@@ -49,3 +49,26 @@ def frames_to_ms(frames, freq):
 def rand_frame_interval(start_ms, end_ms, freq):
     val = random.randint(start_ms, end_ms)
     return ms_to_frames(val, freq)
+
+
+def rand_list_of_ints(x, y, length, min_interval=None, max_interval=None):
+    vals = []
+    for _ in range(length):
+        prev_val = vals and vals[-1]
+        while True:
+            next_val = random.randint(x, y)
+            if not prev_val:
+                break
+            if min_interval and (prev_val + next_val) >= (prev_val + min_interval):
+                continue
+            if max_interval and (prev_val + next_val) <= (prev_val + max_interval):
+                continue
+            break
+        vals.append(next_val)
+    return vals
+
+
+[random.randint(36, 60) for _ in range(320)]
+
+
+

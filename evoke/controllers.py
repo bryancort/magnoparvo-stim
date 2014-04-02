@@ -67,8 +67,8 @@ class Cedrus(Controller):
             devices = pyxid.get_xid_devices()
             time.sleep(0.1)
         device = devices[0]
-        print('Found', device)
-        return devices[0]
+        # print('Found', device)
+        return device
 
     def wait_for_response(self, buttons=None, timeout=None, window=None, clear=True):
         if window and self._window:
@@ -85,7 +85,7 @@ class Cedrus(Controller):
             response = self._get_buttons()
             if (buttons and response in buttons) or (not buttons and response):
                 return True
-            #self._window.flip(clearBuffer=False)
+            # self._window.flip(clearBuffer=False)
 
     def _get_buttons(self):
         buttons = []
