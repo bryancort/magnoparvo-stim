@@ -64,6 +64,7 @@ class Cedrus(Controller):
         devices = []
         print('Trying to capture Cedrus device')
         while not devices:
+            print("looking")
             devices = pyxid.get_xid_devices()
             time.sleep(0.1)
         device = devices[0]
