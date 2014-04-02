@@ -6,7 +6,7 @@ import random
 import os
 import sys
 if sys.platform == 'win32':
-    sys.path.append('C:\\gaelen\\magnoparvo-stim')
+    sys.path.append('C:\\gaelen\\magnoparvo')
 
 # vendor
 from psychopy import visual
@@ -47,7 +47,7 @@ class Magno(BaseExperiment):
         # horizontal_sine.setUseShader(True)
 
         if self._with_timing_test:
-            timing_box = load_timing_box()
+            timing_box = self.load_timing_box()
         else:
             timing_box = None
 
@@ -116,7 +116,7 @@ class Magno(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Magno(debug=True)
+    exp = Magno(debug=True, with_timing_test=True)
     exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()

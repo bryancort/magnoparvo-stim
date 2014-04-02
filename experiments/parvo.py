@@ -6,7 +6,7 @@ import random
 import os
 import sys
 if sys.platform == 'win32':
-    sys.path.append('C:\\gaelen\\magnoparvo-stim')
+    sys.path.append('C:\\gaelen\\magnoparvo')
 
 # vendor
 from psychopy import visual

@@ -67,7 +67,7 @@ class Cedrus(Controller):
             devices = pyxid.get_xid_devices()
             time.sleep(0.1)
         device = devices[0]
-        # print('Found', device)
+        print('Found', device)
         return device
 
     def wait_for_response(self, buttons=None, timeout=None, window=None, clear=True):

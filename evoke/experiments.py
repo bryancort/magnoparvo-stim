@@ -83,7 +83,9 @@ class BaseExperiment(object):
     def load_still_images(self, dirpath, pos=(0.0, 0.0), size=None):
         images = []
         for fname in os.listdir(dirpath):
-            if fname.endswith('.jpg'):
+            if fname.startswith('.'):
+                continue
+            if fname.endswith('.png'):
                 img = self.load_still_image(os.path.join(dirpath, fname),
                                             pos, size)
                 images.append(img)
@@ -120,7 +122,7 @@ class BaseExperiment(object):
     def load_fixation_cross(self, pos=(0, 0)):
         fixation = visual.TextStim(self._window,
             height=0.4,
-            text=u'\u2694',
+            text=u'+',
             font=('Times', 'Times New Roman'),
             color='black',
             pos=pos,
