@@ -54,7 +54,7 @@ class BaseExperiment(object):
     def start_netstation(self):
         try:
             self._netstation = egi.Netstation()
-            self._netstation.connect('11.0.0.42', 55513)
+            self._netstation.connect('10.0.0.42', 55513)
             self._netstation.BeginSession()
             self._netstation.sync()
             self._netstation.StartRecording()
@@ -87,12 +87,12 @@ class BaseExperiment(object):
     def load_still_images(self, dirpath, pos=(0.0, 0.0), size=None):
         images = []
         for fname in os.listdir(dirpath):
-            if fname.startswith('.'):
-                continue
-            if fname.endswith('.png'):
+            if fname.lower().endswith('.png') or fname.lower().endswith('.jpg'):
                 img = self.load_still_image(os.path.join(dirpath, fname),
                                             pos, size)
                 images.append(img)
+            else:
+                continue
         return images
 
     def load_still_image(self, fpath, pos=(0.0, 0.0), size=None):
