@@ -30,13 +30,17 @@ class BaseExperiment(object):
 
     def init_display(self, monitor, width=800, height=600):
         self._monitor = monitors.get(monitor)
-        self._window = visual.Window(size=[width, height],
+        self._window = visual.Window(
+            size=[width, height],
             monitor=self._monitor,
             winType='pyglet',
             waitBlanking=True,  # Default is True
             allowStencil=True,
             fullscr=False,  # True is faster
-            allowGUI=False)
+            allowGUI=False,
+            rgb=(0, 0, 0),  # Gray
+            gamma=2.2,
+        )
 
         gamma.createLinearRamp(self._window, rampType=None)
 
