@@ -44,6 +44,7 @@ class Magno(BaseExperiment):
                                              units='deg',
                                              sf=1.5,
                                              size=2)
+        horizontal_sine.contrast = 0.04
         # horizontal_sine.setUseShader(True)
 
         if self._with_timing_test:
@@ -96,6 +97,7 @@ class Magno(BaseExperiment):
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
+                print("Posting cartoon %s" %  still)
                 self.timed_func(post_cartoon, still)
                 stills += 1
             else:
@@ -117,6 +119,6 @@ class Magno(BaseExperiment):
 
 if __name__ == '__main__':
     exp = Magno(debug=True, with_timing_test=True)
-    exp.init_display('run-station', 1920, 1200)
+    exp.init_display('run-station', 649, 48-)
     exp.init_controller('cedrus')
     exp.run()
