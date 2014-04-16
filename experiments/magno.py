@@ -36,7 +36,7 @@ class Magno(BaseExperiment):
         still_images = still_images[:32]
         random.shuffle(still_images)
 
-        plan = utils.distribute(segments, still_images)
+        plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
         horizontal_sine = visual.GratingStim(self._window,
                                              tex='sin',
@@ -46,7 +46,7 @@ class Magno(BaseExperiment):
                                              size=2)
         # horizontal_sine.setUseShader(True)
 
-        if self._with_timing_test:
+        if self._as_timing_test:
             timing_box = self.load_timing_box()
         else:
             timing_box = None
@@ -55,8 +55,7 @@ class Magno(BaseExperiment):
 
         def move():
             timing_box and timing_box.draw()
-            #horizontal_sine.setPhase(0.06666666666666667, '+')
-            horizontal_sine.setPhase(0.22, '+')  # 1/60.0
+            horizontal_sine.phase += 0.3425
             horizontal_sine.draw()
 
         def still():
@@ -116,7 +115,7 @@ class Magno(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Magno(debug=True, with_timing_test=True)
+    exp = Magno(debug=True, as_timing_test=True)
     exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()

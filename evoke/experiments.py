@@ -15,13 +15,13 @@ from evoke import monitors
 
 class BaseExperiment(object):
 
-    def __init__(self, debug=False, with_timing_test=False):
+    def __init__(self, debug=False, as_timing_test=False):
         self._monitor = None
         self._window = None
         self._netstation = None
         self._controller = None
         self._debug = debug
-        self._with_timing_test = with_timing_test
+        self._as_timing_test = as_timing_test
 
         if debug:
             logging.console.setLevel(logging.DEBUG)
