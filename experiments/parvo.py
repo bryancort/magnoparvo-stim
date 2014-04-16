@@ -38,7 +38,6 @@ class Parvo(Experiment):
 
         plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
-
         std_stim = visual.GratingStim(self._window,
                                       tex=os.path.join(get_current_dir('img'), 'blue-green.png'),
                                       texRes=256,
@@ -54,10 +53,7 @@ class Parvo(Experiment):
                                       size=2)
         # horizontal_sine.setUseShader(True)
 
-        if self._as_timing_test:
-            timing_box = load_timing_box()
-        else:
-            timing_box = None
+        timing_box = None if not self._as_timing_test else self.load_timing_box()
 
         self.start_netstation()
 

@@ -105,7 +105,7 @@ class BaseExperiment(object):
         return img
 
     def wait_for_response(self, buttons=None):
-        return self._controller.wait_for_response()
+        return self._controller.wait_for_response(buttons=buttons)
 
     def release(self):
         self._windows.close()

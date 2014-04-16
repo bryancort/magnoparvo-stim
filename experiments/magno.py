@@ -45,12 +45,8 @@ class Magno(BaseExperiment):
                                              sf=1.5,
                                              size=2)
         horizontal_sine.contrast = 0.04
-        # horizontal_sine.setUseShader(True)
 
-        if self._as_timing_test:
-            timing_box = self.load_timing_box()
-        else:
-            timing_box = None
+        timing_box = None if not self._as_timing_test else self.load_timing_box()
 
         self.start_netstation()
 
