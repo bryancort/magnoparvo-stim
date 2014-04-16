@@ -44,6 +44,7 @@ class Magno(BaseExperiment):
                                              units='deg',
                                              sf=1.5,
                                              size=2)
+        horizontal_sine.contrast = 0.04
         # horizontal_sine.setUseShader(True)
 
         if self._as_timing_test:
@@ -95,6 +96,7 @@ class Magno(BaseExperiment):
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
+                print("Posting cartoon %s" %  still)
                 self.timed_func(post_cartoon, still)
                 stills += 1
             else:
