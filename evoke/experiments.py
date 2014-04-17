@@ -5,8 +5,8 @@ import os
 
 # vendor
 from psychopy import visual, logging, core, gamma
-import egi.simple as egi
-# import egi.threaded as egi
+# import egi.simple as egi
+import egi.threaded as egi
 
 # local
 from evoke import controllers

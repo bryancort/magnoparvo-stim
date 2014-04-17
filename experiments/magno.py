@@ -80,9 +80,6 @@ class Magno(BaseExperiment):
         trials = 1
         stills = 1
         for idx, current in enumerate(plan):
-            if idx % 20 == 0:
-                self.wait_for_response()
-
             if not isinstance(current, int):
                 # Show image
                 self.timed_func(15, current.draw)

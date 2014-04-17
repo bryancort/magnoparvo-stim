@@ -85,9 +85,9 @@ class Cedrus(Controller):
         while check():
             response = self._get_buttons()
             if (buttons and response in buttons) or (not buttons and response):
-                self._clear()  # This should really happen as async thread
+                # self._clear()  # This should really happen as async thread
                 return True
-            self._window.flip(clearBuffer=False)
+            # self._window.flip(clearBuffer=False)
 
     def _get_buttons(self):
         buttons = []
