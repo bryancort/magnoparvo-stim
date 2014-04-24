@@ -13,7 +13,8 @@ _LAB_MONITORS = {
     },
     'run-station': {
         'resolution': (1920, 1200),
-        'diagonal': 61
+        'diagonal': 61,
+        'response_time': 40
     }
 }
 
@@ -34,5 +35,6 @@ def get(name, dist_cm=60):
     mon.setDistance(dist_cm)
     mon.setSizePix(_LAB_MONITORS[name]['resolution'])
     mon.setWidth(_LAB_MONITORS[name]['diagonal'])
+    mon._response_time = _LAB_MONITORS[name].get('response_time', None)
 
     return mon

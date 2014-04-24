@@ -57,6 +57,8 @@ class Magno(BaseExperiment):
 
         def still():
             horizontal_sine.draw()
+            
+        event_args = {'key': 'move'}  # These will never change, so just create them once
 
         # Directions
         slide1 = self.load_text_slide("Welcome and thank you\nfor coming today.")
@@ -93,14 +95,8 @@ class Magno(BaseExperiment):
                 self.timed_func(post_cartoon, still)
                 stills += 1
             else:
-                self.send_event(
-                    'move',
-                    label="Moving",
-                    description='Grating is about to move',
-                    table={'frms': current, 'cntr': trials}
-                )
                 # Move for 100 ms / 6 frames
-                self.timed_func(6, move)
+                self.timed_func(6, move, start_event_args=event_args)
 
                 # Pause for however long plan says
                 self.timed_func(current, still)

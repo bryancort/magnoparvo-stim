@@ -54,7 +54,7 @@ class BaseExperiment(object):
     def start_netstation(self):
         try:
             self._netstation = egi.Netstation()
-            self._netstation.connect('10.0.0.42', 55513)
+            self._netstation.initialize('10.0.0.42', 55513)
             self._netstation.BeginSession()
             self._netstation.sync()
             self._netstation.StartRecording()
@@ -64,10 +64,11 @@ class BaseExperiment(object):
             else:
                 raise
 
-    def stop_netstation(self):
+    def stop_netstation(self, close_netstation=False):
         self._netstation.StopRecording()
-        # self._netstation.EndSession()
-        self._netstation.disconnect()
+        if close_netstation:
+            self._netstation.EndSession()
+        self._netstation.finalize()
 
     def send_event(self, key='evt_', label=None, description=None, table=None):
         self._netstation.send_event(key,
@@ -76,13 +77,26 @@ class BaseExperiment(object):
             description=description,
             table=table)
 
-    def timed_func(self, frames, func=None):
+    def timed_func(self, frames, func=None, start_event_args=None, end_event_args=None):
+        fired_start_event = start_event_args is None
         for _ in range(frames):
             if func:
                 func()
                 self._window.flip()
+                if not fired_start_event:
+                    if self._monitor._response_time:
+                        core.wait(secs=self._monitor._response_time/1000.0)
+                    fired_start_event = True
+                    self.send_event(**start_event_args)
             else:
                 self._window.flip(clearBuffer=False)
+                if not fired_start_event:
+                    if self._monitor._response_time:
+                        core.wait(secs=self._monitor._response_time/1000.0)
+                    fired_start_event = True
+                    self.send_event(**start_event_args)
+        if end_event_args is not None:
+            self.send_event(**end_event_args)
 
     def load_still_images(self, dirpath, pos=(0.0, 0.0), size=None):
         images = []
