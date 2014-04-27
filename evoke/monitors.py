@@ -14,7 +14,7 @@ _LAB_MONITORS = {
     'run-station': {
         'resolution': (1920, 1200),
         'diagonal': 61,
-        'response_time': 40
+        'response_time': 8
     }
 }
 

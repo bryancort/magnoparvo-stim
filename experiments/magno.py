@@ -57,7 +57,7 @@ class Magno(BaseExperiment):
 
         def still():
             horizontal_sine.draw()
-            
+
         event_args = {'key': 'move'}  # These will never change, so just create them once
 
         # Directions
@@ -106,7 +106,7 @@ class Magno(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Magno(debug=True, as_timing_test=True)
+    exp = Magno(debug=False, as_timing_test=True)
     exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()

@@ -12,7 +12,7 @@ if sys.platform == 'win32':
 from psychopy import visual
 
 # local
-from evoke.experiments import Experiment
+from evoke.experiments import BaseExperiment
 from evoke import utils
 
 
@@ -23,7 +23,7 @@ def get_current_dir(append=None):
     return path
 
 
-class Parvo(Experiment):
+class Parvo(BaseExperiment):
 
     def run(self):
 
@@ -104,11 +104,7 @@ class Parvo(Experiment):
 
 
 if __name__ == '__main__':
-    exp = Parvo(debug=True)
-    exp.prerun()
-    exp.run()
-    exp.postrun()
-
-    exp.init_display('run-station', 800, 600)
+    exp = Parvo(debug=False)
+    exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()
