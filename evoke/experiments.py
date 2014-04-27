@@ -79,23 +79,14 @@ class BaseExperiment(object):
             table=table)
 
     def timed_func(self, frames, func=None, start_event_args=None, end_event_args=None):
-        fired_start_event = start_event_args is None
+        if start_event_args is not None:
+            self._window.callOnFlip(self.send_event, **start_event_args)
         for _ in range(frames):
             if func:
                 func()
                 self._window.flip()
-                if not fired_start_event:
-                    if self._monitor._response_time:
-                        core.wait(secs=self._monitor._response_time/1000.0)
-                    fired_start_event = True
-                    self.send_event(**start_event_args)
             else:
                 self._window.flip(clearBuffer=False)
-                if not fired_start_event:
-                    if self._monitor._response_time:
-                        core.wait(secs=self._monitor._response_time/1000.0)
-                    fired_start_event = True
-                    self.send_event(**start_event_args)
         if end_event_args is not None:
             self.send_event(**end_event_args)
 
@@ -154,7 +145,7 @@ class BaseExperiment(object):
             self._window,
             color=(1, 1, 1),
             colorSpace='rgb',
-            pos=(-1, -1),
+            pos=(0, 0),
             sf=0)
         return timing_box
 

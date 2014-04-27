@@ -79,6 +79,7 @@ class Magno(BaseExperiment):
         # Pre-stim
         self.timed_func(utils.ms_to_frames(random.randint(600, 1000), 60), still)
 
+        self._window.setRecordFrameIntervals()
         trials = 1
         stills = 1
         for idx, current in enumerate(plan):
@@ -106,7 +107,8 @@ class Magno(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Magno(debug=False, as_timing_test=True)
+    exp = Magno(debug=False, as_timing_test=False)
     exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()
+    
