@@ -72,8 +72,6 @@ class BaseExperiment(object):
         self._netstation.finalize()
 
     def send_event(self, key='evt_', label=None, description=None, table=None):
-        if random.random() > 0.8:  # Sync clock for 20% of events
-            self._netstation.sync()
         self._netstation.send_event(key,
             label=label,
             timestamp=egi.ms_localtime(),
@@ -156,7 +154,7 @@ class BaseExperiment(object):
             self._window,
             color=(1, 1, 1),
             colorSpace='rgb',
-            pos=(-1, 1),
+            pos=(-1, -1),
             sf=0)
         return timing_box
 
