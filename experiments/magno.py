@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-
 # standard
 from __future__ import print_function, division
 import random
 import os
-import sys
-if sys.platform == 'win32':
-    sys.path.append('C:\\gaelen\\magnoparvo-stim')
+
+os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # vendor
 from psychopy import visual
@@ -111,4 +108,4 @@ if __name__ == '__main__':
     exp.init_display('run-station', 1920, 1200)
     exp.init_controller('cedrus')
     exp.run()
-    
+

@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-
 # standard
 from __future__ import print_function, division
 import random
 import os
-import sys
-if sys.platform == 'win32':
-    sys.path.append('C:\\gaelen\\magnoparvo-stim')
+
+os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # vendor
 from psychopy import visual
