@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from psychopy import visual
 
 # local
-from evoke.experiments import BaseExperiment
+from evoke.experiments import BaseExperiment, SoundFile
 from evoke import utils
 
 
@@ -27,6 +27,10 @@ class Magno(BaseExperiment):
         # Create stimuli
         segments = [random.randint(36, 60) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
+
+        # Opening / closing sounds
+        opening_audio = SoundFile(filepath=get_current_dir('audio/opening.mp3'))
+        closing_audio = SoundFile(filepath=get_current_dir('audio/closing.mp3'))
 
         while len(still_images) < 32:
             still_images = 2 * still_images
@@ -58,15 +62,10 @@ class Magno(BaseExperiment):
         event_args = {'key': 'move'}  # These will never change, so just create them once
 
         # Directions
-        slide1 = self.load_text_slide("Welcome and thank you\nfor coming today.")
-        slide2 = self.load_text_slide("You will see a box in the center of the "
-            "screen or a Toy Story character. When you see a Toy Story "
-            "character push the button on the button box.\n\nThat's all "
-            "you have to do. When you are ready, push the button to "
-            "begin.")
-        self.timed_func(utils.ms_to_frames(4000, 60), slide1.draw)
-        slide2.draw()
-        self._window.flip()
+        opening_slide = self.load_text_slide("Welcome and thank you\nfor coming today.")
+        opening_audio.play()
+        opening_slide.draw()
+        # self._window.flip()
         self.wait_for_response()
 
         # Fixation
@@ -102,6 +101,12 @@ class Magno(BaseExperiment):
                 trials += 1
 
         self.stop_netstation()
+
+        # Closing
+        closing_slide = self.load_text_slide("Welcome and thank you\nfor coming today.")
+        closing_audio.play()
+        closing_slide.draw()
+        # self._window.flip()
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ import os
 import random
 
 # vendor
-from psychopy import visual, logging, core, gamma
+from psychopy import visual, logging, core, gamma, sound
 # import egi.simple as egi
 import egi.threaded as egi
 
@@ -189,3 +189,33 @@ class BaseExperiment(object):
 
     def post_run(self):
         raise NotImplementedError()
+
+
+class Frame(object):
+
+    def __init__(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def add_image(self, filename):
+        pass
+
+    def add_text(self, text):
+        pass
+
+    def set_interval(self, ms):
+        pass
+
+
+class SoundFile(object):
+
+    def __init__(self, filepath):
+        self._sound = sound.Sound(value=filepath)
+
+    def play(self, loops=None, autoStop=True, log=True):
+        self._sound.play(loops=loops, autoStop=autoStop, log=log)
+
+    def stop(self, log=True):
+        self._sound.stop(log=log)
