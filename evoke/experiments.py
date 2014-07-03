@@ -21,8 +21,10 @@ class BaseExperiment(object):
         self._window = None
         self._netstation = None
         self._controller = None
+        self._paused = False
         self._debug = debug
         self._as_timing_test = as_timing_test
+        self._keyboard = None
 
         if debug:
             logging.console.setLevel(logging.DEBUG)
@@ -45,6 +47,8 @@ class BaseExperiment(object):
 
         gamma.createLinearRamp(self._window, rampType=None)
 
+        self._keyboard = controllers.get('keyboard', window=self._window)
+
         if self._debug:
             self._window.setRecordFrameIntervals(True)
             self._window._refreshThreshold = 1/60.0 + 0.004
@@ -52,31 +56,36 @@ class BaseExperiment(object):
     def init_controller(self, controller):
         self._controller = controllers.get(controller, window=self._window)
 
-    def start_netstation(self):
+    def start_netstation(self, ip, port):
         try:
             self._netstation = egi.Netstation()
-            self._netstation.initialize('10.0.0.42', 55513)
+            self._netstation.initialize(ip, port)
             self._netstation.BeginSession()
             self._netstation.sync()
             self._netstation.StartRecording()
         except Exception as exc:
             if self._debug:
                 logging.debug('Unable to access Netstation: %s' % exc)
+                self._netstation = None
             else:
                 raise
 
     def stop_netstation(self, close_netstation=False):
-        self._netstation.StopRecording()
-        if close_netstation:
-            self._netstation.EndSession()
-        self._netstation.finalize()
+        if self._netstation is not None:
+            self._netstation.StopRecording()
+            if close_netstation:
+                self._netstation.EndSession()
+            self._netstation.finalize()
 
     def send_event(self, key='evt_', label=None, description=None, table=None):
-        self._netstation.send_event(key,
-            label=label,
-            timestamp=egi.ms_localtime(),
-            description=description,
-            table=table)
+        if self._netstation is not None:
+            self._netstation.send_event(
+                key,
+                label=label,
+                timestamp=egi.ms_localtime(),
+                description=description,
+                table=table
+            )
 
     def timed_func(self, frames, func=None, start_event_args=None, end_event_args=None):
         if start_event_args is not None:
@@ -107,14 +116,37 @@ class BaseExperiment(object):
             pos=pos,
             units='deg')
         if size:
-            img.size = 2
+            img.size = size
         return img
 
     def wait_for_response(self, buttons=None):
-        return self._controller.wait_for_response(buttons=buttons)
+        if self._controller is None:
+            icontrol = self._keyboard
+        else:
+            icontrol = self._controller
+        return icontrol.wait_for_response(buttons=buttons)
 
-    def release(self):
-        self._windows.close()
+    def handle_pause_and_quit(self):
+        self._check_pause_and_quit()
+        while True:
+            if self._paused:
+                self._window.flip(clearBuffer=False)
+                self._check_pause_and_quit()
+            else:
+                break
+
+    def _check_pause_and_quit(self):
+        for key in self._keyboard.poll():
+            if key.lower() == 'p':
+                self.toggle_pause()
+            elif key.lower() == 'q' and self._paused:
+                self.quit()
+
+    def toggle_pause(self):
+        self._paused = not self._paused
+
+    def quit(self):
+        self._window.close()
         core.quit()
 
     def load_text_slide(self, text, pos=(0, 0)):
@@ -149,5 +181,11 @@ class BaseExperiment(object):
             sf=0)
         return timing_box
 
+    def pre_run(self):
+        raise NotImplementedError()
+
     def run(self):
+        raise NotImplementedError()
+
+    def post_run(self):
         raise NotImplementedError()

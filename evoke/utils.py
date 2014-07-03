@@ -66,9 +66,3 @@ def rand_list_of_ints(x, y, length, min_interval=None, max_interval=None):
             break
         vals.append(next_val)
     return vals
-
-
-[random.randint(36, 60) for _ in range(320)]
-
-
-

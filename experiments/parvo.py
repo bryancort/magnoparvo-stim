@@ -2,8 +2,9 @@
 from __future__ import print_function, division
 import random
 import os
+import sys
 
-os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # vendor
 from psychopy import visual
@@ -52,7 +53,7 @@ class Parvo(BaseExperiment):
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
 
-        self.start_netstation()
+        self.start_netstation('11.0.0.42', 55513)
 
         # Directions
         slide1 = self.load_text_slide("Welcome and thank you\nfor coming today.")
@@ -74,6 +75,7 @@ class Parvo(BaseExperiment):
         self.timed_func(utils.ms_to_frames(random.randint(600, 1000), 60), std_stim.draw)
 
         for current in plan:
+            self.handle_pause_and_quit()  # Need to move this to post flip hook
             if not isinstance(current, int):
                 # Show image
                 self.timed_func(15, current.draw)
@@ -101,7 +103,9 @@ class Parvo(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Parvo(debug=False)
+    DEBUG = True
+    exp = Parvo(debug=DEBUG)
     exp.init_display('run-station', 1920, 1200)
-    exp.init_controller('cedrus')
+    if not DEBUG:
+        exp.init_controller('cedrus')
     exp.run()

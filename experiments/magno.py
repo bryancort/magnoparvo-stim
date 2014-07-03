@@ -2,8 +2,9 @@
 from __future__ import print_function, division
 import random
 import os
+import sys
 
-os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # vendor
 from psychopy import visual
@@ -23,7 +24,6 @@ def get_current_dir(append=None):
 class Magno(BaseExperiment):
 
     def run(self):
-
         # Create stimuli
         segments = [random.randint(36, 60) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
@@ -45,7 +45,7 @@ class Magno(BaseExperiment):
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
 
-        self.start_netstation()
+        self.start_netstation('11.0.0.42', 55513)
 
         def move():
             timing_box and timing_box.draw()
@@ -80,6 +80,7 @@ class Magno(BaseExperiment):
         trials = 1
         stills = 1
         for idx, current in enumerate(plan):
+            self.handle_pause_and_quit()  # Need to move this to post flip hook
             if not isinstance(current, int):
                 # Show image
                 self.timed_func(15, current.draw)
@@ -104,8 +105,9 @@ class Magno(BaseExperiment):
 
 
 if __name__ == '__main__':
-    exp = Magno(debug=False, as_timing_test=False)
-    exp.init_display('run-station', 1920, 1200)
-    exp.init_controller('cedrus')
+    DEBUG = True
+    exp = Magno(debug=DEBUG, as_timing_test=False)
+    exp.init_display('mac-13in', 800, 600)
+    if not DEBUG:
+        exp.init_controller('cedrus')
     exp.run()
-
