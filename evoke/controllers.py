@@ -32,11 +32,12 @@ class Keyboard(Controller):
     def wait_for_response(self, buttons=None, timeout=None):
         while True:
             for key in event.getKeys(timeStamped=False):
+                print(key)
                 if not buttons:
                     break
                 elif key in buttons:
                     break
-            self._window.flip(clearBuffer=False)
+            #self._window.flip(clearBuffer=False)
         return True
 
     def poll(self):
