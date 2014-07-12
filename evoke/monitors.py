@@ -19,7 +19,7 @@ _LAB_MONITORS = {
 }
 
 
-def get(name, dist_cm=60):
+def get(name, dist_cm=120):
     """
     Returns configured monitor object for known monitor names.
     """

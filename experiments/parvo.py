@@ -36,19 +36,31 @@ class Parvo(BaseExperiment):
 
         plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
+
         std_stim = visual.GratingStim(self._window,
-                                      tex=os.path.join(get_current_dir('img'), 'blue-green.png'),
+                                      tex='sqr',
                                       texRes=256,
                                       units='deg',
                                       sf=5.25,
-                                      size=2)
+                                      size=2,
+                                      colorSpace='dkl',
+                                      color=(0,90,1))
+                                             
+#        std_stim = visual.GratingStim(self._window,
+#                                      tex=os.path.join(get_current_dir('img'), 'blue-green.png'),
+#                                      texRes=256,
+#                                      units='deg',
+#                                      sf=5.25,
+#                                      size=2)
 
         dev_stim = visual.GratingStim(self._window,
-                                      tex=os.path.join(get_current_dir('img'), 'red-green.png'),
+                                      tex='sin',
                                       texRes=256,
                                       units='deg',
                                       sf=5.25,
-                                      size=2)
+                                      size=2,
+                                      colorSpace='dkl',
+                                      color=(0,90,1))
         # horizontal_sine.setUseShader(True)
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
@@ -104,8 +116,8 @@ class Parvo(BaseExperiment):
 
 if __name__ == '__main__':
     DEBUG = True
-    exp = Parvo(debug=DEBUG)
-    exp.init_display('run-station', 1920, 1200)
-    if not DEBUG:
-        exp.init_controller('cedrus')
+    exp = Parvo(debug=DEBUG, as_timing_test=False)
+    exp.init_display('run-station', 1024, 800)
+    # exp.init_display('mac-13in', 800, 600)
+    exp.init_controller('cedrus')
     exp.run()

@@ -10,6 +10,7 @@ from psychopy import event
 
 # local
 import utils
+from evoke import _IO_HUB
 
 
 class Controller(object):
@@ -31,13 +32,12 @@ class Keyboard(Controller):
 
     def wait_for_response(self, buttons=None, timeout=None):
         while True:
-            for key in event.getKeys(timeStamped=False):
-                print(key)
+            for key in self.poll():
                 if not buttons:
                     break
                 elif key in buttons:
                     break
-            #self._window.flip(clearBuffer=False)
+            # self._window.flip(clearBuffer=False)
         return True
 
     def poll(self):
@@ -46,8 +46,18 @@ class Keyboard(Controller):
 
 class Mouse(Controller):
 
-    def __init__(self):
-        raise NotImplementedError
+    def __init__(self, window=None):
+        self._window = window
+        self._mouse = _IO_HUB.devices.mouse
+        
+    def hide(self):
+        self._mouse.setSystemCursorVisibility(False)
+
+    def wait_for_response(self, buttons=None, timeout=None):
+        raise NotImplementedError('Need to define')
+
+    def poll(self):
+        raise NotImplementedError('Need to define')
 
 
 class Cedrus(Controller):
@@ -59,15 +69,15 @@ class Cedrus(Controller):
             self._device.reset_rt_timer()
         self._window = window
 
-    def _catch_device(self, timeout=30.0):
+    def _catch_device(self, timeout=15.0):
         devices = []
-        #print('Trying to capture Cedrus device')
+        start_capture = time.time()
         while not devices:
-            # print("looking")
             devices = pyxid.get_xid_devices()
+            if (time.time() - start_capture) > timeout:
+                raise IOError('Could not capture Cedrus device')
             time.sleep(0.1)
         device = devices[0]
-        #print('Found', device)
         return device
 
     def wait_for_response(self, buttons=None, timeout=None):

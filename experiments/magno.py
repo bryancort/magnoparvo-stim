@@ -90,7 +90,6 @@ class Magno(BaseExperiment):
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
-                print("Posting cartoon %s" %  still)
                 self.timed_func(post_cartoon, still)
                 stills += 1
             else:
@@ -104,17 +103,14 @@ class Magno(BaseExperiment):
         self.stop_netstation()
 
         # Closing
-        closing_slide = self.load_text_slide("Welcome and thank you\nfor coming today.")
-        closing_audio.play()
-        closing_slide.draw()
-        # self._window.flip()
+        #closing_audio.play()
+        self.timed_func(utils.ms_to_frames(10000, 60), lambda: closing_frame.draw())
 
 
 if __name__ == '__main__':
-    DEBUG = True
-    exp = Magno(debug=DEBUG, as_timing_test=False)
-    exp.init_display('run-station', 1200, 800)
+    DEBUG = False
+    exp = Magno(debug=DEBUG, as_timing_test=True)
+    exp.init_display('run-station')
     # exp.init_display('mac-13in', 800, 600)
-    if not DEBUG:
-        exp.init_controller('cedrus')
+    exp.init_controller('cedrus')
     exp.run()
