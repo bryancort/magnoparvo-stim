@@ -28,7 +28,7 @@ class Magno(BaseExperiment):
         segments = [random.randint(36, 60) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
 
-        # Opening / closing 
+        # Opening / closing
         opening_audio = SoundFile(filepath=get_current_dir('audio/opening.mp3'))
         opening_frame = self.load_still_image(fpath=get_current_dir('img/opening.png'))
         closing_audio = SoundFile(filepath=get_current_dir('audio/closing.mp3'))
@@ -110,7 +110,7 @@ class Magno(BaseExperiment):
 if __name__ == '__main__':
     DEBUG = False
     exp = Magno(debug=DEBUG, as_timing_test=True)
-    exp.init_display('run-station')
+    exp.init_display('pa241w')
     # exp.init_display('mac-13in', 800, 600)
     exp.init_controller('cedrus')
     exp.run()
