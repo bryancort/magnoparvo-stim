@@ -7,7 +7,9 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # vendor
+import numpy
 from psychopy import visual
+from psychopy.tools.colorspacetools import dkl2rgb
 
 # local
 from evoke.experiments import BaseExperiment
@@ -19,6 +21,27 @@ def get_current_dir(append=None):
     if append:
         path = os.path.join(path, append)
     return path
+
+
+def _create_square_texture(color1, color2, size=(128, 128)):
+    """
+    Creates a multidimensional numpy array of size using the two
+    colors.
+    """
+    def _pow_of_2(num):
+        return ((num & (num - 1)) == 0) and num > 0
+
+    if not(size[0]) or not(size[1]):
+        raise ValueError("Texture should be power of 2")
+
+    texture = numpy.zeros((size[0], size[1], 3))
+    for x in range(size[0]):
+        for y in range(size[1]):
+            if y >= (size[0] / 2):
+                texture[x][y] = color2
+            else:
+                texture[x][y] = color1
+    return texture
 
 
 class Parvo(BaseExperiment):
@@ -36,20 +59,39 @@ class Parvo(BaseExperiment):
 
         plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
-        std_stim = visual.GratingStim(self._window,
-                                      tex=os.path.join(get_current_dir('img'), 'blue-green.png'),
-                                      texRes=256,
-                                      units='deg',
-                                      sf=5.25,
-                                      size=2)
+        conversion_matrix = self._monitor.getDKL_RGB()
+        red_dkl = numpy.array((0, 180, 1))
+        blue_dkl = numpy.array((0, 270, 1))
+        green_dkl = numpy.array((0, 90, 1))
 
-        dev_stim = visual.GratingStim(self._window,
-                                      tex=os.path.join(get_current_dir('img'), 'red-green.png'),
-                                      texRes=256,
-                                      units='deg',
-                                      sf=5.25,
-                                      size=2)
-        # horizontal_sine.setUseShader(True)
+        red_rgb = dkl2rgb(red_dkl, conversion_matrix)
+        blue_rgb = dkl2rgb(blue_dkl, conversion_matrix)
+        green_rgb = dkl2rgb(green_dkl, conversion_matrix)
+
+        red_green_tex = _create_square_texture(red_rgb, green_rgb)
+        blue_green_tex = _create_square_texture(blue_rgb, green_rgb)
+
+        std_stim = visual.GratingStim(
+            self._window,
+            tex=red_green_tex,
+            texRes=128,
+            units='deg',
+            sf=5.25,
+            size=2,
+            colorSpace='rgb',
+        )
+
+        dev_stim = visual.GratingStim(
+            self._window,
+            tex=blue_green_tex,
+            texRes=128,
+            units='deg',
+            sf=5.25,
+            size=2,
+            colorSpace='rgb',
+        )
+        # std_stim.setUseShader(True)
+        # dev_stim.setUseShader(True)
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
 
@@ -104,8 +146,8 @@ class Parvo(BaseExperiment):
 
 if __name__ == '__main__':
     DEBUG = True
-    exp = Parvo(debug=DEBUG)
-    exp.init_display('run-station', 1920, 1200)
-    if not DEBUG:
-        exp.init_controller('cedrus')
+    exp = Parvo(debug=DEBUG, as_timing_test=False)
+    exp.init_display('pa241w', 1024, 800)
+    # exp.init_display('mac-13in', 800, 600)
+    exp.init_controller('cedrus')
     exp.run()

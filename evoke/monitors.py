@@ -11,15 +11,14 @@ _LAB_MONITORS = {
         'resolution': (1440, 900),
         'diagonal': 34
     },
-    'run-station': {
+    'pa241w': {
         'resolution': (1920, 1200),
         'diagonal': 61,
-        'response_time': 8
     }
 }
 
 
-def get(name, dist_cm=60):
+def get(name, dist_cm=120):
     """
     Returns configured monitor object for known monitor names.
     """
@@ -35,6 +34,5 @@ def get(name, dist_cm=60):
     mon.setDistance(dist_cm)
     mon.setSizePix(_LAB_MONITORS[name]['resolution'])
     mon.setWidth(_LAB_MONITORS[name]['diagonal'])
-    mon._response_time = _LAB_MONITORS[name].get('response_time', None)
 
     return mon

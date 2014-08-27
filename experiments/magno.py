@@ -28,9 +28,11 @@ class Magno(BaseExperiment):
         segments = [random.randint(36, 60) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
 
-        # Opening / closing sounds
+        # Opening / closing
         opening_audio = SoundFile(filepath=get_current_dir('audio/opening.mp3'))
+        opening_frame = self.load_still_image(fpath=get_current_dir('img/opening.png'))
         closing_audio = SoundFile(filepath=get_current_dir('audio/closing.mp3'))
+        closing_frame = self.load_still_image(fpath=get_current_dir('img/closing.png'))
 
         while len(still_images) < 32:
             still_images = 2 * still_images
@@ -62,10 +64,9 @@ class Magno(BaseExperiment):
         event_args = {'key': 'move'}  # These will never change, so just create them once
 
         # Directions
-        opening_slide = self.load_text_slide("Welcome and thank you\nfor coming today.")
-        opening_audio.play()
-        opening_slide.draw()
-        # self._window.flip()
+        opening_frame.draw()
+        #opening_audio.play()
+        self._window.flip()
         self.wait_for_response()
 
         # Fixation
@@ -89,7 +90,6 @@ class Magno(BaseExperiment):
 
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
-                print("Posting cartoon %s" %  still)
                 self.timed_func(post_cartoon, still)
                 stills += 1
             else:
@@ -103,16 +103,14 @@ class Magno(BaseExperiment):
         self.stop_netstation()
 
         # Closing
-        closing_slide = self.load_text_slide("Welcome and thank you\nfor coming today.")
-        closing_audio.play()
-        closing_slide.draw()
-        # self._window.flip()
+        #closing_audio.play()
+        self.timed_func(utils.ms_to_frames(10000, 60), lambda: closing_frame.draw())
 
 
 if __name__ == '__main__':
-    DEBUG = True
-    exp = Magno(debug=DEBUG, as_timing_test=False)
-    exp.init_display('mac-13in', 800, 600)
-    if not DEBUG:
-        exp.init_controller('cedrus')
+    DEBUG = False
+    exp = Magno(debug=DEBUG, as_timing_test=True)
+    exp.init_display('pa241w')
+    # exp.init_display('mac-13in', 800, 600)
+    exp.init_controller('cedrus')
     exp.run()

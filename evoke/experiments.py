@@ -12,6 +12,7 @@ import egi.threaded as egi
 # local
 from evoke import controllers
 from evoke import monitors
+from evoke import _IO_HUB
 
 
 class BaseExperiment(object):
@@ -25,29 +26,42 @@ class BaseExperiment(object):
         self._debug = debug
         self._as_timing_test = as_timing_test
         self._keyboard = None
+        self._is_full_screen = None
 
         if debug:
             logging.console.setLevel(logging.DEBUG)
         else:
             logging.console.setLevel(logging.WARNING)
 
-    def init_display(self, monitor, width=800, height=600):
+    def init_display(self, monitor, width=None, height=None):
         self._monitor = monitors.get(monitor)
+        width = width or _IO_HUB.devices.display.getPixelResolution()[0]
+        height = height or _IO_HUB.devices.display.getPixelResolution()[1]
+        full_screen_flag = (
+            True if self._monitor.getSizePix() == (width, height)
+            else False
+        )
+        background_rgb =(
+            (-1, -1, -1) if self._as_timing_test
+            else (0, 0, 0)
+        )
         self._window = visual.Window(
             size=[width, height],
             monitor=self._monitor,
             winType='pyglet',
-            waitBlanking=True,  # Default is True
+            waitBlanking=True,  # Better for vsync?
             allowStencil=True,
-            fullscr=False,  # True is faster
-            allowGUI=False,
-            rgb=(0, 0, 0),  # Gray
-            gamma=2.2,
+            fullscr=full_screen_flag,
+            allowGUI=not full_screen_flag,
+            rgb=background_rgb,
+            # gamma=2.2,
         )
-
         gamma.createLinearRamp(self._window, rampType=None)
 
+        self._mouse = controllers.get('mouse', window=self._window)
         self._keyboard = controllers.get('keyboard', window=self._window)
+        if full_screen_flag:
+            self._mouse.hide()
 
         if self._debug:
             self._window.setRecordFrameIntervals(True)
@@ -120,6 +134,8 @@ class BaseExperiment(object):
         return img
 
     def wait_for_response(self, buttons=None):
+        if self._as_timing_test:
+            return
         if self._controller is None:
             icontrol = self._keyboard
         else:
