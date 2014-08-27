@@ -5,7 +5,7 @@ import os
 import random
 
 # vendor
-from psychopy import visual, logging, core, gamma, sound
+from psychopy import visual, logging, core, gamma, sound, gui
 # import egi.simple as egi
 import egi.threaded as egi
 
@@ -33,17 +33,17 @@ class BaseExperiment(object):
         else:
             logging.console.setLevel(logging.WARNING)
 
-    def init_display(self, monitor, width=None, height=None):
+    def init_display(self, monitor, width=None, height=None, background_rgb=(0, 0, 0)):
         self._monitor = monitors.get(monitor)
         width = width or _IO_HUB.devices.display.getPixelResolution()[0]
         height = height or _IO_HUB.devices.display.getPixelResolution()[1]
-        full_screen_flag = (
+        self._is_full_screen = (
             True if self._monitor.getSizePix() == (width, height)
             else False
         )
         background_rgb =(
             (-1, -1, -1) if self._as_timing_test
-            else (0, 0, 0)
+            else background_rgb
         )
         self._window = visual.Window(
             size=[width, height],
@@ -51,16 +51,17 @@ class BaseExperiment(object):
             winType='pyglet',
             waitBlanking=True,  # Better for vsync?
             allowStencil=True,
-            fullscr=full_screen_flag,
-            allowGUI=not full_screen_flag,
+            fullscr=self._is_full_screen,
+            allowGUI=not self._is_full_screen,
             rgb=background_rgb,
             # gamma=2.2,
+            useFBO=True
         )
         gamma.createLinearRamp(self._window, rampType=None)
 
         self._mouse = controllers.get('mouse', window=self._window)
         self._keyboard = controllers.get('keyboard', window=self._window)
-        if full_screen_flag:
+        if self._is_full_screen:
             self._mouse.hide()
 
         if self._debug:
@@ -112,6 +113,9 @@ class BaseExperiment(object):
                 self._window.flip(clearBuffer=False)
         if end_event_args is not None:
             self.send_event(**end_event_args)
+            
+    def wait(self, ms):
+        core.wait(ms / 1000.0)
 
     def load_still_images(self, dirpath, pos=(0.0, 0.0), size=None):
         images = []
@@ -196,6 +200,12 @@ class BaseExperiment(object):
             pos=(0, 0),
             sf=0)
         return timing_box
+        
+    def get_participant_info(self):
+        participant = {'subject':''}
+        if not gui.DlgFromDict(participant, order=['subject', ]).OK:
+            core.quit()
+        return participant
 
     def pre_run(self):
         raise NotImplementedError()
@@ -230,8 +240,8 @@ class SoundFile(object):
     def __init__(self, filepath):
         self._sound = sound.Sound(value=filepath)
 
-    def play(self, loops=None, autoStop=True, log=True):
-        self._sound.play(loops=loops, autoStop=autoStop, log=log)
+    def play(self, log=True):
+        self._sound.play(log=log)
 
     def stop(self, log=True):
         self._sound.stop(log=log)

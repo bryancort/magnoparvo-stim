@@ -25,13 +25,13 @@ class Magno(BaseExperiment):
 
     def run(self):
         # Create stimuli
-        segments = [random.randint(36, 60) for _ in range(320)]
+        segments = [random.choice([36, 42, 48, 54, 60]) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set1'), size=2)[:32]
 
         # Opening / closing
-        opening_audio = SoundFile(filepath=get_current_dir('audio/opening.mp3'))
+        opening_audio = SoundFile(filepath=get_current_dir('audio/opening.wav'))
         opening_frame = self.load_still_image(fpath=get_current_dir('img/opening.png'))
-        closing_audio = SoundFile(filepath=get_current_dir('audio/closing.mp3'))
+        closing_audio = SoundFile(filepath=get_current_dir('audio/closing.wav'))
         closing_frame = self.load_still_image(fpath=get_current_dir('img/closing.png'))
 
         while len(still_images) < 32:
@@ -41,13 +41,16 @@ class Magno(BaseExperiment):
 
         plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
-        horizontal_sine = visual.GratingStim(self._window,
-                                             tex='sin',
-                                             texRes=256,
-                                             units='deg',
-                                             sf=1.5,
-                                             size=2)
+        horizontal_sine = visual.GratingStim(
+            self._window,
+            tex='sin',
+            texRes=128,
+            units='deg',
+            sf=1.5,
+            size=2
+        )
         horizontal_sine.contrast = 0.04
+        horizontal_sine.setUseShaders(True)
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
 
@@ -60,13 +63,10 @@ class Magno(BaseExperiment):
 
         def still():
             horizontal_sine.draw()
-
-        event_args = {'key': 'move'}  # These will never change, so just create them once
-
+    
         # Directions
-        opening_frame.draw()
-        #opening_audio.play()
-        self._window.flip()
+        # opening_audio.play()
+        self.timed_func(1*60, lambda: opening_frame.draw())
         self.wait_for_response()
 
         # Fixation
@@ -77,12 +77,13 @@ class Magno(BaseExperiment):
         self.timed_func(utils.ms_to_frames(random.randint(600, 1000), 60), still)
 
         self._window.setRecordFrameIntervals()
-        trials = 1
-        stills = 1
+        trials = 0
+        stills = 0
         for idx, current in enumerate(plan):
             self.handle_pause_and_quit()  # Need to move this to post flip hook
             if not isinstance(current, int):
                 # Show image
+                stills += 1
                 self.timed_func(15, current.draw)
 
                 # Wait for the response
@@ -91,26 +92,31 @@ class Magno(BaseExperiment):
                 # Wait a random interval
                 post_cartoon = random.randint(36, 60)
                 self.timed_func(post_cartoon, still)
-                stills += 1
             else:
                 # Move for 100 ms / 6 frames
+                trials += 1
+                event_args = {
+                    'key': 'move',
+                    'label': "Move",
+                    'description': 'Starting to move for 100ms',
+                    'table': {'obs#': trials}
+                }
                 self.timed_func(6, move, start_event_args=event_args)
 
                 # Pause for however long plan says
                 self.timed_func(current, still)
-                trials += 1
 
         self.stop_netstation()
 
         # Closing
-        #closing_audio.play()
-        self.timed_func(utils.ms_to_frames(10000, 60), lambda: closing_frame.draw())
+        # closing_audio.play()
+        self.timed_func(15*60, lambda: closing_frame.draw())
 
 
 if __name__ == '__main__':
     DEBUG = False
-    exp = Magno(debug=DEBUG, as_timing_test=True)
-    exp.init_display('pa241w')
+    exp = Magno(debug=DEBUG, as_timing_test=False)
+    exp.init_display('pa241w', width=1024, height=800)
     # exp.init_display('mac-13in', 800, 600)
     exp.init_controller('cedrus')
     exp.run()

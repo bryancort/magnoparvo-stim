@@ -12,7 +12,7 @@ from psychopy import visual
 from psychopy.tools.colorspacetools import dkl2rgb
 
 # local
-from evoke.experiments import BaseExperiment
+from evoke.experiments import BaseExperiment, SoundFile
 from evoke import utils
 
 
@@ -47,11 +47,16 @@ def _create_square_texture(color1, color2, size=(128, 128)):
 class Parvo(BaseExperiment):
 
     def run(self):
-
         # Create stimuli
-        segments = [random.randint(36, 60) for _ in range(320)]
+        segments = [random.choice([36, 42, 48, 54, 60]) for _ in range(320)]
         still_images = self.load_still_images(get_current_dir('img/set2'))[:32]
 
+        # Opening / closing
+        opening_audio = SoundFile(filepath=get_current_dir('audio/opening.wav'))
+        opening_frame = self.load_still_image(fpath=get_current_dir('img/opening.png'))
+        closing_audio = SoundFile(filepath=get_current_dir('audio/closing.wav'))
+        closing_frame = self.load_still_image(fpath=get_current_dir('img/closing.png'))
+        
         while len(still_images) < 32:
             still_images = 2 * still_images
         still_images = still_images[:32]
@@ -59,21 +64,16 @@ class Parvo(BaseExperiment):
 
         plan = utils.distribute(segments, still_images) if not self._as_timing_test else segments
 
-        conversion_matrix = self._monitor.getDKL_RGB()
-        red_dkl = numpy.array((0, 180, 1))
-        blue_dkl = numpy.array((0, 270, 1))
-        green_dkl = numpy.array((0, 90, 1))
-
-        red_rgb = dkl2rgb(red_dkl, conversion_matrix)
-        blue_rgb = dkl2rgb(blue_dkl, conversion_matrix)
-        green_rgb = dkl2rgb(green_dkl, conversion_matrix)
+        red_rgb = numpy.array((-0.78, -1, -1))
+        green_rgb = numpy.array((-1, -0.875, -1))
+        blue_rgb = numpy.array((-1, -1, 0.85))
 
         red_green_tex = _create_square_texture(red_rgb, green_rgb)
         blue_green_tex = _create_square_texture(blue_rgb, green_rgb)
 
         std_stim = visual.GratingStim(
             self._window,
-            tex=red_green_tex,
+            tex=blue_green_tex,
             texRes=128,
             units='deg',
             sf=5.25,
@@ -83,30 +83,23 @@ class Parvo(BaseExperiment):
 
         dev_stim = visual.GratingStim(
             self._window,
-            tex=blue_green_tex,
+            tex=red_green_tex,
             texRes=128,
             units='deg',
             sf=5.25,
             size=2,
             colorSpace='rgb',
         )
-        # std_stim.setUseShader(True)
-        # dev_stim.setUseShader(True)
+        std_stim.setUseShaders(True)
+        dev_stim.setUseShaders(True)
 
         timing_box = None if not self._as_timing_test else self.load_timing_box()
 
         self.start_netstation('11.0.0.42', 55513)
 
         # Directions
-        slide1 = self.load_text_slide("Welcome and thank you\nfor coming today.")
-        slide2 = self.load_text_slide("You will see a box in the center of the "
-            "screen or a Toy Story character. When you see a Toy Story "
-            "character push the button on the button box.\n\nThat's all "
-            "you have to do. When you are ready, push the button to "
-            "begin.")
-        self.timed_func(utils.ms_to_frames(4000, 60), slide1.draw)
-        slide2.draw()
-        self._window.flip()
+        # opening_audio.play()
+        self.timed_func(60*60, lambda: opening_frame.draw())
         self.wait_for_response()
 
         # Fixation
@@ -116,10 +109,13 @@ class Parvo(BaseExperiment):
         # Pre-stim
         self.timed_func(utils.ms_to_frames(random.randint(600, 1000), 60), std_stim.draw)
 
+        trials = 0
+        stills = 0
         for current in plan:
             self.handle_pause_and_quit()  # Need to move this to post flip hook
             if not isinstance(current, int):
                 # Show image
+                stills += 1
                 self.timed_func(15, current.draw)
 
                 # Wait for the response
@@ -129,25 +125,30 @@ class Parvo(BaseExperiment):
                 post_cartoon = random.randint(36, 60)
                 self.timed_func(post_cartoon, std_stim.draw)
             else:
-                self.send_event(
-                    'flsh',
-                    label="Flash",
-                    description='Starting the red bar flash',
-                    table={'frms': 6}
-                )
+                trials += 1
+                event_args = {
+                    'key': 'flsh',
+                    'label': "Flash",
+                    'description': 'Starting the red bar flash',
+                    'table': {'obs#': events}
+                }
                 # Flash for 100 ms / 6 frames
-                self.timed_func(6, dev_stim.draw)
+                self.timed_func(6, dev_stim.draw, start_event_args=event_args))
 
                 # Pause for however long plan says
                 self.timed_func(current, std_stim.draw)
 
         self.stop_netstation()
+        
+        # Closing
+        # closing_audio.play()
+        self.timed_func(15*60, lambda: closing_frame.draw())
 
 
 if __name__ == '__main__':
     DEBUG = True
     exp = Parvo(debug=DEBUG, as_timing_test=False)
-    exp.init_display('pa241w', 1024, 800)
+    exp.init_display('PA241W', 1024, 800, background_rgb=(-0.935,)*3)
     # exp.init_display('mac-13in', 800, 600)
     exp.init_controller('cedrus')
     exp.run()
