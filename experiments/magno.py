@@ -116,7 +116,7 @@ class Magno(BaseExperiment):
 if __name__ == '__main__':
     DEBUG = False
     exp = Magno(debug=DEBUG, as_timing_test=False)
-    exp.init_display('pa241w', width=1024, height=800)
+    exp.init_display('pa241w')
     # exp.init_display('mac-13in', 800, 600)
     exp.init_controller('cedrus')
     exp.run()

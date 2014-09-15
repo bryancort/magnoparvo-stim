@@ -99,7 +99,7 @@ class Parvo(BaseExperiment):
 
         # Directions
         # opening_audio.play()
-        self.timed_func(60*60, lambda: opening_frame.draw())
+        self.timed_func(1*60, lambda: opening_frame.draw())
         self.wait_for_response()
 
         # Fixation
@@ -130,10 +130,11 @@ class Parvo(BaseExperiment):
                     'key': 'flsh',
                     'label': "Flash",
                     'description': 'Starting the red bar flash',
-                    'table': {'obs#': events}
+                    'table': {'obs#': trials}
                 }
                 # Flash for 100 ms / 6 frames
-                self.timed_func(6, dev_stim.draw, start_event_args=event_args))
+                self.timed_func(6, dev_stim.draw, start_event_args=event_args)
+                stills += 1
 
                 # Pause for however long plan says
                 self.timed_func(current, std_stim.draw)
@@ -148,7 +149,7 @@ class Parvo(BaseExperiment):
 if __name__ == '__main__':
     DEBUG = True
     exp = Parvo(debug=DEBUG, as_timing_test=False)
-    exp.init_display('PA241W', 1024, 800, background_rgb=(-0.935,)*3)
+    exp.init_display('pa241w')
     # exp.init_display('mac-13in', 800, 600)
     exp.init_controller('cedrus')
     exp.run()
